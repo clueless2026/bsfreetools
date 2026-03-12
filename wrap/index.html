@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-[#0A0A0A] text-white antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wrap It 🎁 | Wrapping Paper Calculator</title>
+    <meta name="description" content="Calculate exactly how much wrapping paper you need for any box.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#0A0A0A',
+                        card: '#1A1A1A',
+                        gold: '#FFD700',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        /* Hide number input arrows for cleaner mobile look */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+    <main 
+        x-data="wrapCalculator()" 
+        x-init="$watch('unit', (newVal, oldVal) => convertUnits(newVal, oldVal))"
+        class="max-w-md w-full mx-auto p-5 flex-grow flex flex-col"
+    >
+        
+        <header class="mt-6 mb-8 text-center">
+            <h1 class="text-4xl font-bold mb-2">Wrap It <span class="text-3xl">🎁</span></h1>
+            <p class="text-gray-400 text-sm">How much paper do you actually need.</p>
+        </header>
+
+        <section class="bg-card rounded-2xl p-6 shadow-xl border border-gray-800 mb-6">
+            
+            <div class="flex justify-end mb-6">
+                <div class="bg-background rounded-lg p-1 flex items-center border border-gray-700">
+                    <button @click="unit = 'in'" :class="unit === 'in' ? 'bg-gray-700 text-white' : 'text-gray-400'" class="px-3 py-1 text-sm rounded-md transition-colors">Inches</button>
+                    <button @click="unit = 'cm'" :class="unit === 'cm' ? 'bg-gray-700 text-white' : 'text-gray-400'" class="px-3 py-1 text-sm rounded-md transition-colors">CM</button>
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-8">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Box Length (<span x-text="unit"></span>)</label>
+                    <input x-model.number="l" type="number" inputmode="decimal" placeholder="12" class="w-full bg-background border border-gray-700 rounded-lg p-3 text-lg focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Box Width (<span x-text="unit"></span>)</label>
+                    <input x-model.number="w" type="number" inputmode="decimal" placeholder="8" class="w-full bg-background border border-gray-700 rounded-lg p-3 text-lg focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Box Height (<span x-text="unit"></span>)</label>
+                    <input x-model.number="h" type="number" inputmode="decimal" placeholder="4" class="w-full bg-background border border-gray-700 rounded-lg p-3 text-lg focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors">
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Safety Buffer</label>
+                <div class="flex bg-background border border-gray-700 rounded-lg overflow-hidden">
+                    <template x-for="(option, index) in bufferOptions" :key="index">
+                        <button 
+                            @click="bufferIndex = index"
+                            class="flex-1 py-3 text-sm font-medium transition-colors border-r border-gray-700 last:border-r-0"
+                            :class="bufferIndex === index ? 'bg-gold text-black' : 'text-gray-400 hover:bg-gray-800'"
+                            x-text="unit === 'in' ? option.labelIn : option.labelCm"
+                        ></button>
+                    </template>
+                </div>
+                <p class="text-sm mt-2 text-gray-400" x-text="bufferOptions[bufferIndex].text"></p>
+            </div>
+
+            <button 
+                @click="calculate()" 
+                class="w-full bg-gold text-black font-bold text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:bg-yellow-400 active:scale-[0.98] transition-all"
+            >
+                Calculate Paper Size
+            </button>
+        </section>
+
+        <section x-show="result" x-transition.opacity x-cloak class="mb-8">
+            <div class="bg-card rounded-2xl p-6 border border-gold/30 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-gold/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="flex items-center gap-2 mb-4 text-gold font-semibold text-lg">
+                    <span>✂️ Cut your paper:</span>
+                </div>
+
+                <div class="mb-6 space-y-2">
+                    <div class="flex justify-between items-baseline border-b border-gray-800 pb-2">
+                        <span class="text-gray-400">Width:</span>
+                        <span class="text-3xl font-bold"><span x-text="result?.paperW"></span> <span class="text-lg font-normal text-gray-400" x-text="result?.unit"></span></span>
+                    </div>
+                    <div class="flex justify-between items-baseline border-b border-gray-800 pb-2">
+                        <span class="text-gray-400">Length:</span>
+                        <span class="text-3xl font-bold"><span x-text="result?.paperL"></span> <span class="text-lg font-normal text-gray-400" x-text="result?.unit"></span></span>
+                    </div>
+                </div>
+
+                <div class="bg-background rounded-lg p-4 mb-6 text-sm">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-gray-500">Your box:</span>
+                        <span class="text-gray-300" x-text="`${result?.l} × ${result?.w} × ${result?.h} ${result?.unit}`"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Buffer:</span>
+                        <span class="text-gray-300" x-text="result?.usedBufferIndex === 0 ? 'exact math, no buffer' : (result?.unit === 'in' ? bufferOptions[result?.usedBufferIndex].labelIn : bufferOptions[result?.usedBufferIndex].labelCm) + ' included ✓'"></span>
+                    </div>
+                </div>
+
+                <div class="mb-6 flex flex-col items-center justify-center opacity-80">
+                    <div class="text-xs text-gray-500 mb-2 uppercase tracking-wider">Folding Layout</div>
+                    <div class="flex flex-col items-center">
+                        <div class="border-2 border-dashed border-gray-600 text-[10px] text-gray-500 w-20 h-8 flex items-center justify-center rounded-t-sm border-b-0">Flap</div>
+                        <div class="flex">
+                            <div class="border-2 border-dashed border-gray-600 text-[10px] text-gray-500 w-10 h-16 flex items-center justify-center rounded-l-sm border-r-0">Flap</div>
+                            <div class="bg-gold/10 border-2 border-gold text-gold text-xs font-bold w-20 h-16 flex items-center justify-center">Box</div>
+                            <div class="border-2 border-dashed border-gray-600 text-[10px] text-gray-500 w-10 h-16 flex items-center justify-center rounded-r-sm border-l-0">Flap</div>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-600 text-[10px] text-gray-500 w-20 h-8 flex items-center justify-center rounded-b-sm border-t-0">Flap</div>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-2 italic">Formula: W = 2×(H+W) | L = L+2×H</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button 
+                        @click="shareResult()" 
+                        class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-lg font-medium transition-colors flex justify-center items-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        <span x-text="shareTextBtn">Share</span>
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-gray-600 mt-4 leading-relaxed text-center px-4">
+                Results assume standard flat wrap technique on a rectangular box. Measure your box carefully — we handle the math, you handle the scissors. <span class="text-gray-500">bsfreetools.com</span>
+            </p>
+        </section>
+
+        <footer class="mt-auto py-6 text-center text-xs text-gray-600">
+            Wrap It 🎁 &bull; bsfreetools.com/wrap &bull; Free. No BS.
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('wrapCalculator', () => ({
+                l: '',
+                w: '',
+                h: '',
+                unit: 'in',
+                
+                // Buffer state
+                bufferIndex: 2, // Defaults to the 3rd option (2" / 5cm)
+                bufferOptions: [
+                    { in: 0, cm: 0, labelIn: 'None', labelCm: 'None', text: 'Exact math only. Measure very carefully.' },
+                    { in: 1, cm: 2.5, labelIn: '1"', labelCm: '2.5cm', text: 'Minimal buffer. Good if you\'re experienced.' },
+                    { in: 2, cm: 5, labelIn: '2"', labelCm: '5cm', text: 'Recommended for most gifts.' },
+                    { in: 3, cm: 7.5, labelIn: '3"', labelCm: '7.5cm', text: 'Extra forgiving. Great for odd shapes or thick paper.' }
+                ],
+                
+                result: null,
+                shareTextBtn: 'Share',
+
+                // Handles unit conversions instantly without losing user's relative data
+                convertUnits(newUnit, oldUnit) {
+                    if (newUnit === oldUnit) return;
+                    const factor = newUnit === 'cm' ? 2.54 : (1 / 2.54);
+                    
+                    if (this.l) this.l = Number((this.l * factor).toFixed(1));
+                    if (this.w) this.w = Number((this.w * factor).toFixed(1));
+                    if (this.h) this.h = Number((this.h * factor).toFixed(1));
+                    
+                    this.result = null; // Clear result on unit swap to avoid mismatched displays
+                },
+
+                // Core logic: Math must round up to the nearest half inch/cm
+                roundUpToHalf(val) {
+                    return Math.ceil(val * 2) / 2;
+                },
+
+                calculate() {
+                    const l = parseFloat(this.l);
+                    const w = parseFloat(this.w);
+                    const h = parseFloat(this.h);
+
+                    if (!l || !w || !h || l <= 0 || w <= 0 || h <= 0) {
+                        alert("Please enter valid positive numbers for all box dimensions.");
+                        return;
+                    }
+
+                    // Get currently selected overlap based on active unit
+                    const overlap = this.unit === 'in' 
+                        ? this.bufferOptions[this.bufferIndex].in 
+                        : this.bufferOptions[this.bufferIndex].cm;
+
+                    // Standard Flat Wrap Formula
+                    // Paper Width = 2 × (Box Height + Box Width) + overlap
+                    // Paper Length = Box Length + 2 × Box Height + overlap
+                    const rawWidth = 2 * (h + w) + overlap;
+                    const rawLength = l + (2 * h) + overlap;
+
+                    this.result = {
+                        l: l,
+                        w: w,
+                        h: h,
+                        paperW: this.roundUpToHalf(rawWidth),
+                        paperL: this.roundUpToHalf(rawLength),
+                        unit: this.unit,
+                        usedBufferIndex: this.bufferIndex // Store index to ensure share/display text matches calculated state
+                    };
+
+                    // Scroll to result smoothly
+                    setTimeout(() => {
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    }, 100);
+                },
+
+                async shareResult() {
+                    if (!this.result) return;
+                    
+                    const u = this.result.unit === 'in' ? '"' : 'cm';
+                    const usedIdx = this.result.usedBufferIndex;
+                    const bufferLabel = this.result.unit === 'in' 
+                        ? this.bufferOptions[usedIdx].labelIn 
+                        : this.bufferOptions[usedIdx].labelCm;
+
+                    const bufferText = usedIdx === 0 
+                        ? `No buffer — exact math.` 
+                        : `Includes ${bufferLabel} safety buffer.`;
+
+                    const shareStr = `🎁 Wrap It — bsfreetools.com/wrap\nBox: ${this.result.l}${u} × ${this.result.w}${u} × ${this.result.h}${u}\nCut your paper: ${this.result.paperW}${u} wide × ${this.result.paperL}${u} long\n${bufferText}\nMeasure twice, cut once. ✂️`;
+
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title: 'Wrap It 🎁 Paper Size',
+                                text: shareStr,
+                            });
+                        } catch (err) {
+                            // User cancelled or share failed, fallback to clipboard
+                            this.copyToClipboard(shareStr);
+                        }
+                    } else {
+                        // Fallback
+                        this.copyToClipboard(shareStr);
+                    }
+                },
+
+                copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalText = this.shareTextBtn;
+                        this.shareTextBtn = 'Copied!';
+                        setTimeout(() => {
+                            this.shareTextBtn = originalText;
+                        }, 2000);
+                    }).catch(err => {
+                        alert('Failed to copy to clipboard.');
+                    });
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
