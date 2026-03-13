@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance & Money — bsfreetools.com</title>
+    <title>Labor Index — bsfreetools.com</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💼</text></svg>">
     <script>
         tailwind.config = {
             theme: {
@@ -17,27 +18,85 @@
             }
         }
     </script>
-    <style>body { background-color: #0A0A0A; color: #FFFFFF; font-family: 'Inter', sans-serif; }</style>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { background-color: #0A0A0A; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
 </head>
 <body class="antialiased selection:bg-gold selection:text-black">
-    <nav class="p-6 flex justify-between items-center max-w-5xl mx-auto">
-        <a href="/" class="text-xl font-black text-gold italic hover:opacity-80 transition-opacity">bsfreetools.com</a>
-        <div class="text-[10px] font-bold text-gray-500 border border-accentGray px-3 py-1 rounded-full uppercase tracking-widest bg-accentGray/20">100% Private</div>
+
+    <nav class="p-6 max-w-2xl mx-auto flex justify-between items-center">
+        <div class="text-sm font-bold text-gray-500 uppercase tracking-widest">
+            ← <a href="/finance" class="text-gold hover:underline transition-all">Finance</a> / Labor Index
+        </div>
+        <div class="text-[10px] font-bold text-gray-600 border border-accentGray px-2 py-1 rounded">100% PRIVATE</div>
     </nav>
 
-    <header class="pt-12 pb-8 px-6 max-w-5xl mx-auto">
-        <div class="flex items-center space-x-4 mb-2">
-            <span class="text-5xl">💰</span>
-            <h2 class="text-4xl font-black uppercase italic tracking-tight">Finance & Money</h2>
-        </div>
-        <p class="text-gray-400 font-medium">Tools that tell you the truth about money.</p>
-    </header>
+    <main class="max-w-2xl mx-auto px-6 pt-12 pb-24" x-data="{ 
+        price: '', 
+        wage: '', 
+        tax: 25,
+        get hours() {
+            if (!this.price || !this.wage) return 0;
+            const netWage = this.wage * (1 - (this.tax / 100));
+            return (this.price / netWage).toFixed(1);
+        }
+    }">
+        <header class="mb-12">
+            <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight italic">💼 Labor Index</h1>
+            <p class="text-gray-400 font-medium leading-relaxed">Stop thinking in dollars. Start thinking in hours. How much of your life does this item actually cost?</p>
+        </header>
 
-    <div class="max-w-5xl mx-auto px-6 mb-12">
-        <div class="w-full border border-accentGray/50 rounded-xl bg-[#0F0F0F] flex flex-col items-center justify-center p-4">
-            <span class="text-[9px] uppercase tracking-widest text-gray-700 mb-1">Advertisement</span>
-            <div class="w-full h-[50px] md:h-[90px] flex items-center justify-center text-gray-800 font-mono text-xs">728x90 / 320x50 Responsive Slot</div>
-        </div>
-    </div>
+        <div class="bg-cardBg rounded-3xl p-8 border-t-4 border-gold shadow-2xl space-y-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500">Item Price ($)</label>
+                    <input type="number" x-model="price" placeholder="499" 
+                        class="w-full bg-black border-2 border-accentGray rounded-xl p-4 text-2xl font-bold text-gold focus:border-gold outline-none transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500">Hourly Wage ($)</label>
+                    <input type="number" x-model="wage" placeholder="45" 
+                        class="w-full bg-black border-2 border-accentGray rounded-xl p-4 text-2xl font-bold text-gold focus:border-gold outline-none transition-all">
+                </div>
+            </div>
 
-    <main class="max-
+            <div class="space-y-4 pt-4 border-t border-accentGray/50">
+                <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-500">Estimated Tax Rate (%)</label>
+                    <span class="text-gold font-bold" x-text="tax + '%'"></span>
+                </div>
+                <input type="range" x-model="tax" min="0" max="50" step="1" 
+                    class="w-full h-2 bg-accentGray rounded-lg appearance-none cursor-pointer accent-gold">
+                <p class="text-[10px] text-gray-600 italic">Factoring in taxes gives you your true net labor value.</p>
+            </div>
+
+            <div class="pt-8 border-t-2 border-dashed border-accentGray flex flex-col items-center text-center">
+                <span class="text-[12px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Life Cost</span>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-7xl md:text-8xl font-black text-white tracking-tighter italic" x-text="hours">0</span>
+                    <span class="text-2xl font-black text-gold uppercase italic">Hours</span>
+                </div>
+                <p class="mt-4 text-gray-400 text-sm font-medium" x-show="hours > 0">
+                    You have to work nearly <span class="text-white" x-text="hours"></span> hours of your finite life to own this. Is it worth it?
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-16 text-center">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-gray-600 block mb-4">Advertisement</span>
+            <div class="inline-block bg-accentGray/10 border-2 border-dashed border-accentGray rounded-xl w-[320px] h-[50px] md:w-[468px] md:h-[60px]"></div>
+        </div>
+    </main>
+
+    <footer class="py-12 bg-[#0D0D0D] border-t border-accentGray/50 text-center px-6">
+        <p class="text-gray-400 text-xs mb-4">No data is sent to our servers. All math happens locally in your browser.</p>
+        <p class="text-gray-600 text-[10px] font-bold tracking-widest uppercase italic italic">
+            © 2026 bsfreetools.com — Simple tools. Zero BS.
+        </p>
+    </footer>
+
+</body>
+</html>
