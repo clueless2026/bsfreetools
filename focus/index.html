@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus | BS-Free Tools</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { --bg: #050505; --accent: #4ade80; --text: #eee; --gray: #222; --active-text: #555; }
+        body { 
+            background: var(--bg); color: var(--text); font-family: ui-monospace, 'Cascadia Code', monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; overflow: hidden; transition: background 0.5s;
+        }
+        .presence { font-size: 0.7rem; color: var(--active-text); margin-bottom: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
+        
+        #taskInput {
+            background: transparent; border: none; border-bottom: 1px solid transparent;
+            color: var(--accent); text-align: center; font-family: inherit; font-size: 1rem;
+            width: 80%; outline: none; margin-bottom: 1rem; opacity: 0.3; transition: 0.3s;
+        }
+        #taskInput:focus { opacity: 1; border-color: var(--active-text); }
+
+        .timer { 
+            font-size: clamp(6rem, 28vw, 15rem); font-weight: 200; margin: 0.5rem 0; 
+            letter-spacing: -5px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer; position: relative;
+        }
+        .timer.active { color: var(--accent); text-shadow: 0 0 40px rgba(74, 222, 128, 0.15); animation: pulse 2.5s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.75; } 100% { opacity: 1; } }
+
+        .controls { display: flex; gap: 1.5rem; margin-top: 2rem; }
+        button {
+            background: #0a0a0a; border: 1px solid #1a1a1a; color: var(--text);
+            padding: 18px 36px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        button:hover { border-color: var(--accent); color: var(--accent); }
+
+        .footer { position: absolute; bottom: 30px; font-size: 0.65rem; color: var(--active-text); text-align: center; line-height: 1.8; }
+        .footer a { color: var(--accent); text-decoration: none; opacity: 0.8; }
+        .footer a:hover { opacity: 1; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="presence" id="presence">CONNECTING...</div>
+    
+    <input type="text" id="taskInput" placeholder="WHAT ARE YOU DOING?" maxlength="30">
+
+    <div class="timer" id="display" onclick="toggleTimer()">25:00</div>
+
+    <div class="controls">
+        <button id="toggleBtn">START</button>
+        <button id="resetBtn">RESET</button>
+    </div>
+    
+    <div class="footer">
+        BSFREETOOLS.COM • NO ACCOUNTS • NO TRACKING<br>
+        THIS TOOL IS FREE FOREVER. COFFEE IS OPTIONAL. → <a href="https://ko-fi.com/bsfreetools" target="_blank">KO-FI.COM/BSFREETOOLS ☕</a>
+    </div>
+
+    <script>
+        let duration = 25 * 60 * 1000; 
+        let endTime = null;
+        let remainingAtPause = duration;
+        let timerId = null;
+
+        const display = document.getElementById('display');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const presence = document.getElementById('presence');
+        const taskInput = document.getElementById('taskInput');
+
+        const counts = [3,7,11,14,19,23,31,47];
+        const places = ['library','coffee shop','basement','the void','somewhere quiet','a moving train','dead of night','their car'];
+        
+        function setGhostLine() {
+            const n = counts[Math.floor(Math.random() * counts.length)];
+            const p = places[Math.floor(Math.random() * places.length)];
+            presence.textContent = `● ${n} GHOSTS FOCUSING IN ${p}`;
+        }
+
+        function playChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 1.2);
+            } catch(e) {}
+        }
+
+        function updateDisplay(ms) {
+            const totalSecs = Math.max(0, Math.floor(ms / 1000));
+            const mins = Math.floor(totalSecs / 60).toString().padStart(2, '0');
+            const secs = (totalSecs % 60).toString().padStart(2, '0');
+            display.textContent = `${mins}:${secs}`;
+            document.title = `${mins}:${secs} - Focus`;
+        }
+
+        function tick() {
+            const remaining = endTime - Date.now();
+            if (remaining <= 0) {
+                stopTimer();
+                updateDisplay(0);
+                playChime();
+                setGhostLine();
+                return;
+            }
+            updateDisplay(remaining);
+            timerId = requestAnimationFrame(tick);
+        }
+
+        function toggleTimer() { timerId ? stopTimer() : startTimer(); }
+
+        function startTimer() {
+            endTime = Date.now() + remainingAtPause;
+            display.classList.add('active');
+            toggleBtn.textContent = 'PAUSE';
+            timerId = requestAnimationFrame(tick);
+        }
+
+        function stopTimer() {
+            cancelAnimationFrame(timerId);
+            timerId = null;
+            remainingAtPause = endTime - Date.now();
+            display.classList.remove('active');
+            toggleBtn.textContent = 'RESUME';
+        }
+
+        toggleBtn.onclick = toggleTimer;
+        resetBtn.onclick = () => {
+            stopTimer(); remainingAtPause = duration; updateDisplay(duration);
+            toggleBtn.textContent = 'START';
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement === taskInput) return;
+            if (e.code === 'Space') { e.preventDefault(); toggleTimer(); }
+            if (e.key.toLowerCase() === 'r') resetBtn.click();
+        });
+
+        setGhostLine();
+        updateDisplay(duration);
+    </script>
+</body>
+</html>

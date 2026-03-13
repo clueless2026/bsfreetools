@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Labor Index | bsfreetools.com</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <style>
+        :root { --bg: #000; --card: #0a0a0a; --accent: #00FF41; --text: #fff; --sub: #666; --nav: #111; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { 
+            background: var(--bg); color: var(--text); margin: 0; padding: 0; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        /* Standard Suite Nav */
+        nav {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--nav);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+        }
+        nav a { color: #888; text-decoration: none; font-size: 0.75rem; font-weight: bold; text-transform: lowercase; }
+        .privacy-badge { font-size: 0.6rem; color: var(--accent); border: 1px solid var(--accent); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 900; }
+
+        .app-container { width: 100%; max-width: 400px; padding: 25px 20px; }
+
+        header { margin-bottom: 25px; border-left: 3px solid var(--accent); padding-left: 15px; }
+        h1 { font-size: 1.6rem; font-weight: 900; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
+        .tagline { font-size: 0.65rem; color: var(--sub); letter-spacing: 2px; margin-top: 4px; }
+
+        .input-wrap { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #1a1a1a; transition: border-color 0.2s; }
+        .input-wrap:focus-within { border-color: var(--accent); }
+        label { display: block; font-size: 0.65rem; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+        input { background: transparent; border: none; color: #fff; width: 100%; font-size: 1.6rem; outline: none; font-weight: 700; padding: 0; }
+        input::placeholder { color: #151515; }
+
+        .results { display: none; margin-top: 25px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .main-stat { background: var(--accent); color: #000; padding: 35px 20px; border-radius: 15px; text-align: center; margin-bottom: 12px; }
+        .big-num { font-size: 5rem; font-weight: 950; line-height: 0.8; }
+        .label-text { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-top: 5px; }
+
+        .doom-clock { background: #111; padding: 20px; border-radius: 12px; border-top: 2px solid var(--accent); margin-bottom: 12px; text-align: center; }
+        .time-display { font-size: 2.5rem; font-weight: 800; margin: 5px 0; color: #fff; }
+        .sub-label { font-size: 0.7rem; color: #555; font-weight: 600; text-transform: uppercase; }
+
+        .utility-shame { background: #080808; border: 1px solid #1a1a1a; padding: 18px; border-radius: 10px; font-size: 0.85rem; color: #888; line-height: 1.5; }
+        .utility-shame b { color: #fff; }
+
+        /* The Ironic Ad Unit */
+        .ad-unit { margin-top: 30px; padding: 18px; border-radius: 10px; background: linear-gradient(180deg, #0a0a0a 0%, #000 100%); border: 1px solid #222; position: relative; }
+        .ad-tag { position: absolute; top: -9px; right: 12px; background: #000; color: #444; font-size: 0.55rem; padding: 0 6px; border: 1px solid #222; border-radius: 3px; }
+        .ad-content { font-size: 0.8rem; color: #777; line-height: 1.4; }
+        .ad-btn { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-weight: 900; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        footer { margin: 40px 0 20px; padding: 20px; border-top: 1px solid #111; width: 100%; max-width: 400px; text-align: center; }
+        .footer-text { font-size: 0.65rem; color: #333; line-height: 1.6; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="https://bsfreetools.com">bsfreetools.com</a>
+    <div class="privacy-badge">Privacy First</div>
+</nav>
+
+<div class="app-container">
+    <header>
+        <h1>Labor Index</h1>
+        <div class="tagline">The Cost of Your Life Energy</div>
+    </header>
+
+    <div class="input-wrap">
+        <label>Purchase Price ($)</label>
+        <input type="number" id="price" placeholder="0.00" inputmode="decimal">
+    </div>
+
+    <div class="input-wrap">
+        <label>Hourly Wage (Net $)</label>
+        <input type="number" id="wage" placeholder="0.00" inputmode="decimal">
+    </div>
+
+    <div class="input-wrap">
+        <label>Benchmark (Optional - e.g. $15 Pizza)</label>
+        <input type="number" id="alt" placeholder="15.00" inputmode="decimal">
+    </div>
+
+    <div id="results" class="results">
+        <div class="main-stat">
+            <div id="hours" class="big-num">0</div>
+            <div class="label-text">Hours of Existence</div>
+        </div>
+
+        <div class="doom-clock">
+            <div class="sub-label">Ownership Finish Line</div>
+            <div id="timeClock" class="time-display">--:--</div>
+            <div class="sub-label" style="color:#333;">(Calculated from a 9:00 AM start)</div>
+        </div>
+
+        <div id="utilityText" class="utility-shame"></div>
+    </div>
+
+    <div class="ad-unit">
+        <span class="ad-tag">AD</span>
+        <div class="ad-content">
+            <b>Stop trading life for things you don't need.</b> Your time is your only non-renewable asset. Optimize your yield.
+        </div>
+        <a href="#" class="ad-btn">Start Building Leverage →</a>
+    </div>
+
+    <footer>
+        <div class="footer-text">
+            All processing is client-side. <br> 
+            Zero data collection. No server storage. <br>
+            Refreshing this page wipes all inputs.
+        </div>
+    </footer>
+</div>
+
+<script>
+    const pIn = document.getElementById('price');
+    const wIn = document.getElementById('wage');
+    const aIn = document.getElementById('alt');
+    const res = document.getElementById('results');
+    
+    function update() {
+        const p = parseFloat(pIn.value);
+        const w = parseFloat(wIn.value);
+        const a = parseFloat(aIn.value);
+
+        if (p > 0 && w > 0) {
+            const h = (p / w).toFixed(1);
+            document.getElementById('hours').innerText = h;
+            
+            // Calculate Finish Time (9 AM Start)
+            let mins = Math.round(h * 60);
+            let d = new Date();
+            d.setHours(9, 0, 0);
+            d.setMinutes(d.getMinutes() + mins);
+            document.getElementById('timeClock').innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Utility Logic
+            if (a > 0) {
+                const ratio = (p / a).toFixed(1);
+                document.getElementById('utilityText').innerHTML = `This purchase trades away <b>${ratio}x</b> of your favorite benchmark alternative. Choose wisely.`;
+            } else {
+                document.getElementById('utilityText').innerHTML = "Set a benchmark above to see the opportunity cost.";
+            }
+
+            res.style.display = 'block';
+        } else {
+            res.style.display = 'none';
+        }
+    }
+
+    [pIn, wIn, aIn].forEach(el => el.addEventListener('input', update));
+
+    // The Standard Suite Exit Guard
+    window.onbeforeunload = function(e) {
+        if (pIn.value || wIn.value) {
+            const msg = "Data is ephemeral. Leaving now will wipe your calculation.";
+            e.returnValue = msg;
+            return msg;
+        }
+    };
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
+
+</body>
+</html>
