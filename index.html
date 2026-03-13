@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bsfreetools.com — Simple tools. Zero BS.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>BS</text></svg>">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { gold: '#FFD700', darkBg: '#0A0A0A', cardBg: '#1A1A1A', accentGray: '#2A2A2A' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0A0A0A; color: #FFFFFF; }
+        .category-card:hover:not(.disabled) { border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+    </style>
+</head>
+<body class="antialiased selection:bg-gold selection:text-black">
+
+    <header class="pt-20 pb-12 px-6 text-center max-w-4xl mx-auto">
+        <h1 class="text-6xl md:text-8xl font-black text-gold tracking-tighter mb-4 italic">bsfreetools.com</h1>
+        <p class="text-lg font-bold text-gray-500 uppercase tracking-[0.4em] mb-8 text-center">Simple tools. Zero BS.</p>
+        <p class="text-lg md:text-xl text-gray-300 font-medium max-w-xl mx-auto leading-relaxed">
+            Free, private, single-purpose tools that solve real problems. No accounts. No tracking. Ever.
+        </p>
+    </header>
+
+    <div class="max-w-4xl mx-auto px-6 mb-16">
+        <div class="w-full border-2 border-dashed border-accentGray rounded-xl bg-[#0F0F0F] flex flex-col items-center justify-center p-4">
+            <span class="text-[10px] uppercase tracking-widest text-gray-600 mb-2">Advertisement</span>
+            <div class="w-[300px] h-[50px] md:w-[728px] md:h-[90px] flex items-center justify-center text-gray-800 font-mono text-xs">
+                728x90 / 320x50 Responsive Slot
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-6 mb-24">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <a href="/finance" class="category-card flex items-center justify-between p-5 h-[90px] bg-cardBg border border-accentGray rounded-xl transition-all group">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">💰</span>
+                    <div>
+                        <h3 class="font-bold text-lg group-hover:text-gold transition-colors">Finance & Money</h3>
+                        <p class="text-xs text-gray-500">Truth about money</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="bg-gold/10 text-gold text-[10px] font-black px-2 py-1 rounded uppercase">1 Tool</span>
+                    <span class="text-gray-600 group-hover:text-gold transition-colors">→</span>
+                </div>
+            </a>
+
+            <a href="/productivity" class="category-card flex items-center justify-between p-5 h-[90px] bg-cardBg border border-accentGray rounded-xl transition-all group">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">⏱️</span>
+                    <div>
+                        <h3 class="font-bold text-lg group-hover:text-gold transition-colors">Focus & Productivity</h3>
+                        <p class="text-xs text-gray-500">Get things done. No noise.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="bg-gold/10 text-gold text-[10px] font-black px-2 py-1 rounded uppercase">1 Tool</span>
+                    <span class="text-gray-600 group-hover:text-gold transition-colors">→</span>
+                </div>
+            </a>
+
+            <a href="/life" class="category-card flex items-center justify-between p-5 h-[90px] bg-cardBg border border-accentGray rounded-xl transition-all group">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">🎁</span>
+                    <div>
+                        <h3 class="font-bold text-lg group-hover:text-gold transition-colors">Life & Home</h3>
+                        <p class="text-xs text-gray-500">Everyday tools for real life</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="bg-gold/10 text-gold text-[10px] font-black px-2 py-1 rounded uppercase">1 Tool</span>
+                    <span class="text-gray-600 group-hover:text-gold transition-colors">→</span>
+                </div>
+            </a>
+
+            <div class="disabled flex items-center justify-between p-5 h-[90px] bg-cardBg/50 border border-accentGray/50 rounded-xl opacity-60 grayscale cursor-not-allowed">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">💬</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-400">Social & Relationships</h3>
+                        <p class="text-xs text-gray-600 italic">Navigate the group chat</p>
+                    </div>
+                </div>
+                <span class="text-[9px] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded uppercase">Coming Soon</span>
+            </div>
+
+            <div class="disabled flex items-center justify-between p-5 h-[90px] bg-cardBg/50 border border-accentGray/50 rounded-xl opacity-60 grayscale cursor-not-allowed">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">🏠</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-400">Real Estate & Renting</h3>
+                        <p class="text-xs text-gray-600 italic">Know your numbers</p>
+                    </div>
+                </div>
+                <span class="text-[9px] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded uppercase">Coming Soon</span>
+            </div>
+
+            <div class="disabled flex items-center justify-between p-5 h-[90px] bg-cardBg/50 border border-accentGray/50 rounded-xl opacity-60 grayscale cursor-not-allowed">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">📊</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-400">Business & Work</h3>
+                        <p class="text-xs text-gray-600 italic">Tools for people who work</p>
+                    </div>
+                </div>
+                <span class="text-[9px] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded uppercase">Coming Soon</span>
+            </div>
+
+            <div class="disabled flex items-center justify-between p-5 h-[90px] bg-cardBg/50 border border-accentGray/50 rounded-xl opacity-60 grayscale cursor-not-allowed">
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl">🎮</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-400">Just for Fun</h3>
+                        <p class="text-xs text-gray-600 italic">When you're done</p>
+                    </div>
+                </div>
+                <span class="text-[9px] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded uppercase">Coming Soon</span>
+            </div>
+
+        </div>
+    </main>
+
+    <section class="bg-[#0D0D0D] border-y border-accentGray/50 py-16 px-6">
+        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+            <div><span class="text-2xl block mb-2">⚡</span><h4 class="font-black italic mb-1 uppercase text-sm">One Job</h4><p class="text-xs text-gray-500">Perfectly focused tools.</p></div>
+            <div><span class="text-2xl block mb-2">🔒</span><h4 class="font-black italic mb-1 uppercase text-sm">Your Data</h4><p class="text-xs text-gray-500">Nothing leaves your browser.</p></div>
+            <div><span class="text-2xl block mb-2">🚫</span><h4 class="font-black italic mb-1 uppercase text-sm">No BS</h4><p class="text-xs text-gray-500">No accounts or tracking.</p></div>
+        </div>
+    </section>
+
+    <footer class="py-12 text-center">
+        <p class="text-gray-600 text-[10px] font-bold tracking-widest uppercase italic">© 2026 bsfreetools.com — Simple tools. Zero BS.</p>
+    </footer>
+</body>
+</html>
