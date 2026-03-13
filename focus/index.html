@@ -12,6 +12,19 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden; transition: background 0.5s;
         }
+
+        /* Minimalist Nav Bar */
+        nav {
+            position: absolute; top: 20px; left: 20px;
+            font-size: 0.7rem; letter-spacing: 1px;
+            z-index: 10;
+        }
+        nav a {
+            color: var(--active-text); text-decoration: none; transition: 0.3s;
+            border-bottom: 1px solid transparent; padding-bottom: 2px;
+        }
+        nav a:hover { color: var(--accent); border-color: var(--accent); }
+
         .presence { font-size: 0.7rem; color: var(--active-text); margin-bottom: 1.5rem; letter-spacing: 2px; text-transform: uppercase; }
         
         #taskInput {
@@ -30,7 +43,12 @@
         
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.75; } 100% { opacity: 1; } }
 
-        .controls { display: flex; gap: 1.5rem; margin-top: 2rem; }
+        .presets { display: flex; gap: 1rem; opacity: 0; transition: 0.3s; pointer-events: none; margin-top: -1rem; margin-bottom: 1rem;}
+        .presets.visible { opacity: 0.4; pointer-events: auto; }
+        .presets span { cursor: pointer; font-size: 0.8rem; }
+        .presets span:hover { color: var(--accent); }
+
+        .controls { display: flex; gap: 1.5rem; margin-top: 1rem; }
         button {
             background: #0a0a0a; border: 1px solid #1a1a1a; color: var(--text);
             padding: 18px 36px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.8rem;
@@ -40,14 +58,24 @@
 
         .footer { position: absolute; bottom: 30px; font-size: 0.65rem; color: var(--active-text); text-align: center; line-height: 1.8; }
         .footer a { color: var(--accent); text-decoration: none; opacity: 0.8; }
-        .footer a:hover { opacity: 1; text-decoration: underline; }
     </style>
 </head>
 <body>
 
+    <nav>
+        <a href="https://bsfreetools.com">BSFREETOOLS.COM</a>
+    </nav>
+
     <div class="presence" id="presence">CONNECTING...</div>
     
     <input type="text" id="taskInput" placeholder="WHAT ARE YOU DOING?" maxlength="30">
+
+    <div class="presets" id="presetBar">
+        <span onclick="setDuration(15)">15m</span>
+        <span onclick="setDuration(25)">25m</span>
+        <span onclick="setDuration(45)">45m</span>
+        <span onclick="setDuration(90)">90m</span>
+    </div>
 
     <div class="timer" id="display" onclick="toggleTimer()">25:00</div>
 
@@ -57,8 +85,8 @@
     </div>
     
     <div class="footer">
-        BSFREETOOLS.COM • NO ACCOUNTS • NO TRACKING<br>
-        THIS TOOL IS FREE FOREVER. COFFEE IS OPTIONAL. → <a href="https://ko-fi.com/bsfreetools" target="_blank">KO-FI.COM/BSFREETOOLS ☕</a>
+        NO ACCOUNTS • NO TRACKING • LOCAL ONLY<br>
+        <a href="https://ko-fi.com/bsfreetools" target="_blank">SUPPORT THE MISSION ☕</a>
     </div>
 
     <script>
@@ -72,6 +100,7 @@
         const resetBtn = document.getElementById('resetBtn');
         const presence = document.getElementById('presence');
         const taskInput = document.getElementById('taskInput');
+        const presetBar = document.getElementById('presetBar');
 
         const counts = [3,7,11,14,19,23,31,47];
         const places = ['library','coffee shop','basement','the void','somewhere quiet','a moving train','dead of night','their car'];
@@ -82,19 +111,35 @@
             presence.textContent = `● ${n} GHOSTS FOCUSING IN ${p}`;
         }
 
+        function setDuration(mins) {
+            if (timerId) return;
+            duration = mins * 60 * 1000;
+            remainingAtPause = duration;
+            updateDisplay(duration);
+        }
+
+        // --- FIXED AUDIO LOGIC ---
         function playChime() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
+                
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(440, ctx.currentTime);
-                gain.gain.setValueAtTime(0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.01);
+                
+                // Fixed: Set non-zero start point for exponential ramp
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 1.2);
-            } catch(e) {}
+                
+                osc.connect(gain); 
+                gain.connect(ctx.destination);
+                
+                osc.start(); 
+                osc.stop(ctx.currentTime + 1.2);
+            } catch(e) {
+                console.error("Audio failed:", e);
+            }
         }
 
         function updateDisplay(ms) {
@@ -123,6 +168,7 @@
         function startTimer() {
             endTime = Date.now() + remainingAtPause;
             display.classList.add('active');
+            presetBar.classList.remove('visible');
             toggleBtn.textContent = 'PAUSE';
             timerId = requestAnimationFrame(tick);
         }
@@ -132,6 +178,7 @@
             timerId = null;
             remainingAtPause = endTime - Date.now();
             display.classList.remove('active');
+            presetBar.classList.add('visible');
             toggleBtn.textContent = 'RESUME';
         }
 
@@ -139,6 +186,7 @@
         resetBtn.onclick = () => {
             stopTimer(); remainingAtPause = duration; updateDisplay(duration);
             toggleBtn.textContent = 'START';
+            presetBar.classList.add('visible');
         };
 
         window.addEventListener('keydown', (e) => {
@@ -147,8 +195,10 @@
             if (e.key.toLowerCase() === 'r') resetBtn.click();
         });
 
+        // Initialize
         setGhostLine();
         updateDisplay(duration);
+        presetBar.classList.add('visible');
     </script>
 </body>
 </html>

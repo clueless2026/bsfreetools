@@ -1,15 +1,23 @@
 {
-    "name": "BS Free Focus Timer",
-    "short_name": "Focus",
-    "start_url": "/focus/",
-    "display": "standalone",
-    "background_color": "#0A0A0A",
-    "theme_color": "#4ade80",
-    "icons": [
-      {
-        "src": "icon.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ]
-  }
+  "name": "Focus | BS-Free",
+  "short_name": "Focus",
+  "description": "A minimalist, no-BS focus timer.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/050505/4ade80?text=F",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512/050505/4ade80?text=F",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
