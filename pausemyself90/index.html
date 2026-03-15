@@ -11,20 +11,23 @@
                display: flex; align-items: center; justify-content: center; height: 100dvh; margin: 0; overflow: hidden; }
         #app { text-align: center; width: 90%; max-width: 400px; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; }
         
-        .brand-stack { margin-bottom: 2rem; line-height: 1.1; }
-        .brand-stack span { display: block; text-transform: uppercase; letter-spacing: 4px; pointer-events: none;}
+        /* Vertical Brand Header */
+        .brand-stack { margin-bottom: 2rem; line-height: 1.1; pointer-events: none; }
+        .brand-stack span { display: block; text-transform: uppercase; letter-spacing: 4px; }
         .brand-p { font-size: 2.5rem; font-weight: 200; color: #fff; }
         .brand-m { font-size: 2.5rem; font-weight: 500; color: var(--blue); }
         .brand-90 { font-size: 4rem; font-weight: 900; letter-spacing: 10px; margin-top: 0.5rem; color: #fff; }
 
+        /* The Circle: Using a smoother transition for a "Headspace" feel */
         .circle-wrap { height: 220px; display: flex; align-items: center; justify-content: center; margin: 1rem 0; }
         .circle { width: 100px; height: 100px; border: 4px solid var(--blue); border-radius: 50%; 
-                   transition: transform 4s ease-in-out; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); pointer-events: none;}
-        .inhale { transform: scale(2.0); }
+                   transition: transform 4s ease-in-out, box-shadow 4s ease-in-out; 
+                   box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+        .inhale { transform: scale(2.2); box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
         
         .btn { background: var(--blue); color: #fff; border: none; padding: 1.5rem 2rem; 
                border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; 
-               -webkit-appearance: none; -webkit-tap-highlight-color: transparent; position: relative; z-index: 10; }
+               -webkit-appearance: none; -webkit-tap-highlight-color: transparent; }
         .secondary { background: transparent; border: 1px solid #444; }
         
         .hidden { display: none !important; }
@@ -43,7 +46,7 @@
                 <span class="brand-90">90</span>
             </div>
             <p style="color: #888; margin-bottom: 2rem; font-size: 0.9rem;">Biological Transition Utility</p>
-            <button id="startBtn" class="btn" onclick="startApp()">Begin 4-7-8 Session</button>
+            <button id="startBtn" class="btn">Begin 4-7-8 Session</button>
         </div>
 
         <div id="active" class="hidden">
@@ -53,8 +56,8 @@
 
         <div id="decision" class="hidden">
             <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">Session complete.</p>
-            <button class="btn" onclick="window.location.reload()">I'm Ready</button>
-            <button class="btn secondary" onclick="startApp()">Repeat Session</button>
+            <button id="readyBtn" class="btn">I'm Ready</button>
+            <button id="repeatBtn" class="btn secondary">Repeat Session</button>
         </div>
 
         <div class="beta-warning">
@@ -63,51 +66,47 @@
     </div>
 
     <script>
-        // FORCED CACHE CLEAR: Version 1.0.3
-        console.log("App Version 1.0.3 Loaded");
-
+        // Version 1.0.6 - CaC + GPT Refined
         let isRunning = false;
+
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
 
         async function startApp() {
             if (isRunning) return;
             isRunning = true;
-            
-            console.log("Starting Session...");
 
-            // UI Elements
             const gate = document.getElementById('gate');
             const active = document.getElementById('active');
             const decision = document.getElementById('decision');
             const msg = document.getElementById('msg');
             const ball = document.getElementById('ball');
 
-            // Toggle UI
             gate.classList.add('hidden');
             decision.classList.add('hidden');
             active.classList.remove('hidden');
 
             // Initial voice handshake
             try {
+                window.speechSynthesis.cancel();
                 const utter = new SpeechSynthesisUtterance("Begin reset.");
                 utter.rate = 0.9;
                 window.speechSynthesis.speak(utter);
-            } catch(e) { console.log("Voice blocked"); }
-            
-            // 4-7-8 Breathing Loop
+            } catch(e) { console.log("Voice failed"); }
+
             for (let i = 0; i < 4; i++) {
-                // Inhale (4s)
-                msg.innerText = "Inhale";
+                // INHALE
+                msg.textContent = "Inhale";
                 ball.classList.add('inhale');
-                await new Promise(r => setTimeout(r, 4000));
+                await sleep(4000);
                 
-                // Hold (7s)
-                msg.innerText = "Hold";
-                await new Promise(r => setTimeout(r, 7000));
+                // HOLD
+                msg.textContent = "Hold";
+                await sleep(7000);
                 
-                // Exhale (8s)
-                msg.innerText = "Exhale";
+                // EXHALE
+                msg.textContent = "Exhale";
                 ball.classList.remove('inhale');
-                await new Promise(r => setTimeout(r, 8000));
+                await sleep(8000);
             }
 
             isRunning = false;
@@ -119,12 +118,17 @@
             } catch(e) {}
         }
 
-        // Unregister all old service workers to prevent "zombie code"
+        // Attach listeners after DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('startBtn').addEventListener('click', startApp);
+            document.getElementById('repeatBtn').addEventListener('click', startApp);
+            document.getElementById('readyBtn').addEventListener('click', () => window.location.reload());
+        });
+
+        // Background Cleanup
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) {
-                    registration.unregister();
-                } 
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                for(let r of regs) r.unregister();
             });
         }
     </script>
