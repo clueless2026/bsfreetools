@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>P90 Beta</title>
+    <title>PauseMyself 90</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --blue: #3b82f6; --bg: #000; --red: #ef4444; }
@@ -11,7 +11,6 @@
                display: flex; align-items: center; justify-content: center; height: 100dvh; margin: 0; overflow: hidden; }
         #app { text-align: center; width: 90%; max-width: 400px; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; }
         
-        /* Vertical Brand Header */
         .brand-stack { margin-bottom: 2rem; line-height: 1.1; }
         .brand-stack span { display: block; text-transform: uppercase; letter-spacing: 4px; }
         .brand-p { font-size: 2.5rem; font-weight: 200; color: #fff; }
@@ -22,8 +21,57 @@
         .circle { width: 100px; height: 100px; border: 4px solid var(--blue); border-radius: 50%; 
                    transition: transform 4s ease-in-out; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
         .inhale { transform: scale(2.0); }
+        
         .btn { background: var(--blue); color: #fff; border: none; padding: 1.2rem 2.4rem; 
                border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
         .secondary { background: transparent; border: 1px solid #444; }
+        
         .hidden { display: none; }
-        #msg { font-size: 1.8rem; font-weight: 300; min-height: 1.6em; margin-bottom: 0.5rem
+        #msg { font-size: 1.8rem; font-weight: 300; min-height: 1.6em; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        
+        .beta-warning { position: absolute; bottom: 30px; left: 0; right: 0; font-size: 0.65rem; color: var(--red); 
+                        text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; padding: 0 20px; line-height: 1.4; font-weight: bold; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="gate">
+            <div class="brand-stack">
+                <span class="brand-p">Pause</span>
+                <span class="brand-m">Myself</span>
+                <span class="brand-90">90</span>
+            </div>
+            <p style="color: #888; margin-bottom: 2rem; font-size: 0.9rem;">Biological Transition Utility</p>
+            <button class="btn" onclick="startApp()">Begin 4-7-8 Session</button>
+        </div>
+
+        <div id="active" class="hidden">
+            <p id="msg">Prepare...</p>
+            <div class="circle-wrap"><div id="ball" class="circle"></div></div>
+        </div>
+
+        <div id="decision" class="hidden">
+            <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">Session complete.</p>
+            <button class="btn" onclick="exitApp()">I'm Ready</button>
+            <button class="btn secondary" onclick="restartApp()">Not Ready - Repeat Session</button>
+        </div>
+
+        <div class="beta-warning">
+            BETA TEST PHASE: THIS TOOL IS NOT AUTHORIZED FOR PUBLIC USE. <br>USE AT YOUR OWN RISK.
+        </div>
+    </div>
+
+    <script>
+        const synth = window.speechSynthesis;
+        let isRunning = false;
+
+        function speak(text) {
+            if (!synth) return;
+            synth.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.rate = 0.9;
+            utter.pitch = 1;
+            synth.speak(utter);
+        }
+
+        function sleep(ms)
