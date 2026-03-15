@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeeKiller | Track & Destroy Your Monthly Fees | bsfreetools.com</title>
+<meta name="description" content="Track and kill hidden monthly fees. See how much long-term wealth you could save by cutting subscriptions — 100% private and on your device.">
+<link rel="canonical" href="https://bsfreetools.com/feekiller" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0A">
+
+<meta property="og:title" content="FeeKiller: Track & Destroy Your Monthly Fees">
+<meta property="og:description" content="Track and kill hidden monthly fees. See your long-term wealth lost to subscriptions — 100% private and on your device.">
+<meta property="og:url" content="https://bsfreetools.com/feekiller">
+<meta property="og:type" content="website">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "FeeKiller",
+  "url": "https://bsfreetools.com/feekiller",
+  "description": "Visualize the long-term cost of subscriptions and monthly fees to motivate smarter financial choices.",
+  "applicationCategory": "FinanceApplication"
+}
+</script>
+
+<style>
+:root {
+  --bg: #0A0A0A; --gold: #FFD700; --white: #FFFFFF;
+  --gray: #1A1A1A; --input-bg: #252525; --red: #FF4C4C; --toast-bg: #333;
+}
+body {
+  background-color: var(--bg); color: var(--white); font-family: 'Inter', sans-serif;
+  margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+nav { width: 100%; background: #000; padding: 18px 0; text-align: center; border-bottom: 1px solid var(--gray); }
+nav a { color: var(--gold); text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+.container { max-width: 500px; width: 92%; padding: 20px 0; }
+header { text-align: center; margin-bottom: 30px; }
+h1 { color: var(--gold); margin: 0; font-size: 3rem; font-weight: 900; letter-spacing: -3px; }
+.tagline { color: #888; font-size: 1rem; margin-top: 5px; font-weight: 400; }
+
+.ad-slot { width: 100%; height: 90px; background: var(--gray); margin: 20px 0; display: flex; align-items: center; justify-content: center; border: 1px dashed #444; color: #555; font-size: 0.7rem; text-transform: uppercase; }
+
+.card { background: var(--gray); padding: 25px; border-radius: 24px; margin-bottom: 20px; border: 1px solid #333; position: relative; }
+.section-label { font-size: 0.75rem; color: #666; text-transform: uppercase; margin-bottom: 12px; display: block; letter-spacing: 1.5px; }
+.quick-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+.chip { background: #000; border: 1px solid #333; color: #aaa; padding: 10px 16px; border-radius: 50px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+.chip:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+.btn-preload { background: #222; color: #ccc; border: 1px dashed #555; width: 100%; padding: 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; margin-bottom: 25px; transition: 0.2s; }
+.btn-preload:hover { background: #333; color: #fff; border-color: var(--gold); }
+
+.add-form { display: flex; flex-direction: column; width: 100%; }
+.input-row { display: flex; gap: 12px; margin-bottom: 15px; }
+input[type="text"], input[type="number"] { background: var(--input-bg); border: 1px solid #444; color: white; padding: 16px; border-radius: 12px; flex: 1; font-size: 1rem; outline: none; }
+input:focus { border-color: var(--gold); }
+
+.btn-add { background: var(--gold); color: black; border: none; padding: 18px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; }
+.btn-add:active { transform: scale(0.97); }
+
+.sub-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid #222; transition: all 0.3s ease-in-out; }
+.sub-item.removing { opacity: 0; transform: translateX(-30px); }
+.sub-name { font-weight: 600; font-size: 1.1rem; word-break: break-word; }
+.sub-cost { color: var(--gold); font-size: 0.95rem; font-weight: bold; white-space: nowrap; margin-left: 10px; }
+.del-btn { color: var(--red); background: none; border: 1px solid var(--red); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: background 0.2s; margin-left: 15px; }
+.del-btn:hover { background: rgba(255,76,76,0.15); }
+
+.drain-summary { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #444;}
+.drain-box { text-align: center; flex: 1; }
+.drain-label { font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 5px;}
+.drain-value { font-weight: 900; font-size: 1.4rem; color: var(--red); }
+
+.control-group { margin: 30px 0; }
+.control-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 12px; color: #BBB; }
+.control-label span:last-child { color: var(--gold); font-weight: bold; font-size: 1.1rem; }
+input[type="range"] { width: 100%; accent-color: var(--gold); background: #333; height: 10px; border-radius: 5px; appearance: none; cursor: pointer; }
+
+.shock-zone { text-align: center; background: #000; border: 3px solid var(--gold); padding: 40px 20px; border-radius: 30px; margin-top: 30px; position: relative; overflow: hidden; }
+.wealth-display { font-size: 4.2rem; font-weight: 900; color: var(--gold); margin: 15px 0; letter-spacing: -3px; line-height: 1; }
+.cancel-pitch { margin-top: 10px; font-weight: bold; color: var(--gold); font-size: 1.05rem; }
+
+.chart-wrap { height: 260px; margin-top: 25px; background: rgba(255, 215, 0, 0.01); border-radius: 15px; }
+
+.offenders-box { background: #111; border: 1px solid #333; border-radius: 16px; padding: 20px; margin-top: 25px; text-align: left; }
+.offenders-title { font-size: 0.8rem; color: var(--red); text-transform: uppercase; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; text-align: center; }
+.offender-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; border-bottom: 1px solid #222; padding-bottom: 10px;}
+.offender-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+.offender-fv { color: var(--gold); font-weight: bold; }
+
+.share-btn { background: var(--white); color: #000; border: none; padding: 16px 35px; border-radius: 50px; font-size: 0.95rem; font-weight: 900; margin-top: 25px; cursor: pointer; text-transform: uppercase; width: 100%; }
+.reset-btn { background: transparent; color: #555; border: none; padding: 10px; cursor: pointer; font-size: 0.8rem; margin-top: 30px; text-decoration: underline; width: 100%; }
+.reset-btn:hover { color: var(--red); }
+
+#toast { visibility: hidden; min-width: 200px; background-color: var(--toast-bg); color: #fff; text-align: center; border-radius: 50px; padding: 12px; position: fixed; z-index: 1000; bottom: 30px; font-size: 0.9rem; font-weight: bold; border: 1px solid #444; }
+#toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+.empty-msg { color: #555; text-align: center; padding: 20px; font-style: italic; font-size: 1rem; }
+.seo-text { color: #555; font-size: 0.85rem; line-height: 1.7; margin-top: 50px; text-align: justify; border-top: 1px solid #222; padding-top: 25px; }
+footer { text-align: center; font-size: 0.75rem; color: #444; margin: 60px 0; border-top: 1px solid #111; padding-top: 20px; line-height: 1.6;}
+</style>
+</head>
+<body>
+
+<nav><a href="https://bsfreetools.com">← BACK TO ALL TOOLS</a></nav>
+
+<div class="container">
+<header>
+<h1>FEEKILLER</h1>
+<div class="tagline">Track and destroy your monthly fees.</div>
+</header>
+
+<div class="ad-slot">ADVERTISEMENT</div>
+
+<div class="card">
+<span class="section-label">Tap common monthly leaks:</span>
+<div class="quick-chips" id="chipContainer">
+  <div class="chip" data-name="Streaming Bundle" data-price="25.00">+ Video & Streaming</div>
+  <div class="chip" data-name="Music App" data-price="12.00">+ Music</div>
+  <div class="chip" data-name="Gym Membership" data-price="45.00">+ Gym</div>
+  <div class="chip" data-name="Cloud Storage" data-price="9.99">+ Cloud/Storage</div>
+  <div class="chip" data-name="Software SaaS" data-price="19.99">+ Software/SaaS</div>
+</div>
+
+<button class="btn-preload" id="btnLoadAverage">Load "Average American" Profile ($112/mo)</button>
+
+<form class="add-form" id="feeForm">
+<div class="input-row">
+<input type="text" id="subName" placeholder="Fee Name (e.g. Netflix)" aria-label="Fee Name" required maxlength="40">
+<input type="number" id="subPrice" placeholder="Monthly $" step="0.01" min="0.01" max="10000" inputmode="decimal" aria-label="Monthly Cost" required>
+</div>
+<button type="submit" class="btn-add">Add to Hit List</button>
+</form>
+</div>
+
+<div class="card">
+<div id="subList"></div>
+<div class="drain-summary">
+  <div class="drain-box">
+    <div class="drain-label">Monthly Drain</div>
+    <div class="drain-value" id="totalMonthly">$0</div>
+  </div>
+  <div class="drain-box" style="border-left: 1px solid #333;">
+    <div class="drain-label">Yearly Drain</div>
+    <div class="drain-value" id="totalYearly">$0</div>
+  </div>
+</div>
+</div>
+
+<div id="calculatorControls" class="card" style="display:none;">
+<div class="control-group">
+  <div class="control-label"><span>Expected Growth Rate (ROI)</span><span id="roiVal">8%</span></div>
+  <input type="range" id="roiInput" min="1" max="15" value="8">
+</div>
+<div class="control-group">
+  <div class="control-label"><span>Time Horizon</span><span id="yearsVal">30 Years</span></div>
+  <input type="range" id="yearsInput" min="1" max="45" value="30">
+</div>
+</div>
+
+<div id="shockZone" class="shock-zone" style="display:none;">
+<div class="shock-title" id="shockLabel">Your 30-Year Wealth Gap</div>
+<div class="wealth-display" id="wealthNum">$0</div>
+<div id="cancelPitch" class="cancel-pitch"></div>
+<div class="chart-wrap"><canvas id="wealthChart"></canvas></div>
+<div class="offenders-box" id="topOffendersBox">
+  <div class="offenders-title">Biggest Wealth Drains</div>
+  <div id="offendersList"></div>
+</div>
+<button class="share-btn" id="btnShare">Share My Score</button>
+</div>
+
+<button class="reset-btn" id="btnClear">Clear All Tracked Data</button>
+
+<div class="seo-text">
+<p>FeeKiller is a specialized financial calculator from bsfreetools.com designed to combat "Fee Creep" by visualizing the future value of redirected monthly expenses. By tracking recurring costs for streaming, memberships, and software, FeeKiller calculates the total opportunity cost over long-term investment periods using compound interest math. Most users discover that even minor monthly fees can result in wealth gaps exceeding $50,000 when compounded at market rates. FeeKiller is fully private; all data stays local on your device.</p>
+</div>
+
+<div class="ad-slot">ADVERTISEMENT</div>
+
+<footer>
+<p>DISCLAIMER: This is a math tool, not financial advice. Brand names are examples only; this tool is not affiliated with any company. All data stays local.</p>
+<p>Canonical: bsfreetools.com/feekiller</p>
+</footer>
+</div>
+
+<div id="toast">Copied to clipboard!</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// --- Service Worker Registration ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Reg Failed:', err));
+  });
+}
+
+// --- State & Formatters ---
+let subs = JSON.parse(localStorage.getItem('feekiller_master')) || [];
+let chart = null;
+const fmt = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+const fmtDec = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});
+
+// XSS Sanitizer Hook
+function sanitize(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// --- Cancel Pitch ---
+const cancelExamples = ["Netflix","Disney+","Spotify","Amazon Prime","Adobe","DoorDash","Gym Membership","Apple Music","YouTube Premium","Cloud Storage"];
+function renderCancelPitch() {
+  const rand = cancelExamples[Math.floor(Math.random()*cancelExamples.length)];
+  const el = document.getElementById("cancelPitch");
+  if(el){ el.innerHTML = `Cancel <span style="color:#FFF">${rand}</span> &rarr; Pay yourself thousands (calculated over time).`; }
+}
+
+// --- DOM Elements ---
+const form = document.getElementById('feeForm');
+const nInput = document.getElementById('subName');
+const pInput = document.getElementById('subPrice');
+const list = document.getElementById('subList');
+const roiInput = document.getElementById('roiInput');
+const yearsInput = document.getElementById('yearsInput');
+const shockZone = document.getElementById('shockZone');
+const controls = document.getElementById('calculatorControls');
+
+// --- Core Logic ---
+function saveAndRender(){ localStorage.setItem('feekiller_master',JSON.stringify(subs)); renderList(); updateCalculations(); }
+function addSub(name,price){
+  name=name.trim(); price=parseFloat(price);
+  if(!name||isNaN(price)||price<=0||price>10000)return;
+  subs.push({name,price,id:Date.now()}); saveAndRender();
+}
+
+form.addEventListener('submit',(e)=>{e.preventDefault(); addSub(nInput.value,pInput.value); nInput.value=''; pInput.value=''; nInput.focus();});
+document.getElementById('chipContainer').addEventListener('click',(e)=>{if(e.target.classList.contains('chip')){addSub(e.target.dataset.name,e.target.dataset.price);}});
+document.getElementById('btnLoadAverage').addEventListener('click',()=>{subs=[{name:"Streaming Bundle",price:25,id:Date.now()+1},{name:"Gym & Fitness",price:45,id:Date.now()+2},{name:"Cloud Storage",price:10,id:Date.now()+3}]; saveAndRender();});
+
+function renderList(){
+  list.innerHTML=''; 
+  if(subs.length===0){
+    list.innerHTML='<div class="empty-msg">No fees tracked yet. Add one above.</div>'; 
+    controls.style.display='none'; 
+    shockZone.style.display='none'; 
+    return;
+  }
+  
+  controls.style.display='block'; 
+  shockZone.style.display='block';
+  
+  subs.forEach(s=>{
+    const safeName = sanitize(s.name);
+    const div=document.createElement('div'); 
+    div.className='sub-item';
+    div.innerHTML=`<div class="sub-name">${safeName}</div><div style="display:flex;align-items:center"><div class="sub-cost">${fmtDec.format(s.price)}</div><button class="del-btn" data-id="${s.id}">Remove</button></div>`;
+    list.appendChild(div);
+  });
+  
+  document.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',(ev)=>{
+    const id=parseInt(ev.target.dataset.id); 
+    subs=subs.filter(x=>x.id!==id); 
+    saveAndRender();
+  }));
+  renderCancelPitch();
+}
+
+function updateCalculations(){
+  if (subs.length === 0) return;
+
+  const monthly = subs.reduce((a,b)=>a+b.price,0); 
+  const yearly = monthly*12;
+  document.getElementById('totalMonthly').textContent=fmtDec.format(monthly);
+  document.getElementById('totalYearly').textContent=fmtDec.format(yearly);
+
+  const roiAnnual = parseFloat(roiInput.value)/100;
+  const r = roiAnnual / 12; // Monthly rate
+  const years = parseInt(yearsInput.value);
+  const n = years * 12; // Total months
+  
+  const fv = monthly*((Math.pow(1+r,n)-1)/r);
+  document.getElementById('wealthNum').textContent=fmt.format(fv);
+
+  // Top offenders
+  const top5 = [...subs].sort((a,b)=>b.price-a.price).slice(0,5);
+  const offendersEl = document.getElementById('offendersList');
+  offendersEl.innerHTML='';
+  top5.forEach(o=>{
+      const safeName = sanitize(o.name);
+      const offenderFv = o.price*((Math.pow(1+r,n)-1)/r);
+      offendersEl.innerHTML+=`<div class="offender-row"><span>${safeName}</span><span class="offender-fv">${fmt.format(offenderFv)}</span></div>`;
+  });
+
+  // Chart Rendering
+  const ctx = document.getElementById('wealthChart').getContext('2d');
+  const labels = [];
+  const data = [];
+  const step = years <= 20 ? 1 : Math.ceil(years / 20);
+  
+  for (let i = 0; i <= years; i += step) {
+      labels.push(i + 'y');
+      const chartMonths = i * 12;
+      const chartFv = chartMonths === 0 ? 0 : monthly * ((Math.pow(1 + r, chartMonths) - 1) / r);
+      data.push(chartFv);
+  }
+
+  if(chart) chart.destroy();
+  chart=new Chart(ctx,{
+      type:'line',
+      data:{
+          labels,
+          datasets:[{
+              label:'Future Value',
+              data,
+              color:'gold',
+              borderColor:'gold',
+              backgroundColor:'rgba(255,215,0,0.05)',
+              fill:true,
+              tension:0.4,
+              pointRadius:4,
+              pointBackgroundColor:'#FFD700',
+              borderWidth:3
+          }]
+      },
+      options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+              y:{display:false},
+              x:{ticks:{color:'#666',font:{size:10}},grid:{display:false}}
+          },
+          plugins:{legend:{display:false}},
+          interaction:{intersect:false,mode:'index'}
+      }
+  });
+}
+
+// --- Range Inputs ---
+roiInput.addEventListener('input',()=>{document.getElementById('roiVal').textContent=roiInput.value+'%'; updateCalculations();});
+yearsInput.addEventListener('input',()=>{document.getElementById('yearsVal').textContent=yearsInput.value+' Years'; updateCalculations();});
+
+// --- Share & Reset ---
+document.getElementById('btnShare').addEventListener('click',()=>{
+  const total = document.getElementById('wealthNum').innerText;
+  const text = `I just found a ${total} Wealth Gap using FeeKiller. Check out my FeeKiller savings at bsfreetools.com/feekiller`;
+  
+  if(navigator.share){
+      navigator.share({title:'FeeKiller', text:text, url:'https://bsfreetools.com/feekiller'}).catch(()=>{});
+  } else {
+      navigator.clipboard.writeText(text);
+      const t=document.getElementById('toast'); t.className='show'; setTimeout(()=>{t.className='';},3000);
+  }
+});
+
+document.getElementById('btnClear').addEventListener('click',()=>{if(confirm("Clear all tracked fees?")){subs=[];saveAndRender();}});
+
+// --- Init ---
+renderList();
+updateCalculations();
+</script>
+
+</body>
+</html>
