@@ -1,0 +1,22 @@
+{
+  "name": "Image Quick Fix",
+  "short_name": "Quick Fix",
+  "description": "Instant client-side image resizer and cleanup tool.",
+  "start_url": "/imagequickfix/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

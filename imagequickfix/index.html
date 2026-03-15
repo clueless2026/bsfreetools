@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Quick Fix</title>
+
+<meta name="description" content="Instant client-side image resizer and cleanup tool. Generate PWA icons and marketing assets directly in your browser.">
+<meta property="og:title" content="Image Quick Fix">
+<meta property="og:description" content="Quickly resize images and generate 192x192 and 512x512 icons instantly.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bsfreetools.com/imagequickfix">
+<link rel="canonical" href="https://bsfreetools.com/imagequickfix">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121212">
+
+<style>
+:root {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --primary-color: #d4af37;
+    --text-color: #f5f5f5;
+    --accent-hover: #c9a933;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0; 
+    padding: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+}
+nav {
+    width: 100%; 
+    background: var(--surface-color); 
+    padding: 1rem; 
+    text-align: center; 
+    border-bottom: 1px solid #333;
+}
+nav a {
+    color: var(--primary-color);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    font-size: 1rem;
+}
+main {
+    width: 100%; 
+    max-width: 800px; 
+    padding: 2rem;
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px;
+}
+.seo-text {
+    font-size: 0.9rem; 
+    color: #888; 
+    line-height: 1.5;
+}
+.upload-area {
+    border: 2px dashed #444; 
+    padding: 40px; 
+    border-radius: 10px;
+    text-align: center; 
+    background: var(--surface-color); 
+    transition: border-color 0.2s;
+}
+.upload-area.dragover { 
+    border-color: var(--primary-color); 
+}
+.upload-btn {
+    background: #333; 
+    color: #fff; 
+    padding: 12px 24px; 
+    border-radius: 6px;
+    cursor: pointer; 
+    display: inline-block; 
+    font-weight: bold; 
+    font-size: 1rem; 
+    transition: background 0.2s;
+}
+.upload-btn:hover { 
+    background: var(--primary-color); 
+    color: #000; 
+}
+.preview-container {
+    display: none; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 20px;
+}
+img#preview { 
+    max-width: 100%; 
+    max-height: 400px; 
+    border-radius: 6px; 
+    border: 1px solid #333; 
+}
+.controls { 
+    display: flex; 
+    gap: 15px; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+}
+button {
+    background: var(--primary-color); 
+    color: #000; 
+    border: none;
+    padding: 12px 24px; 
+    font-weight: bold; 
+    border-radius: 6px; 
+    cursor: pointer;
+    transition: background 0.2s;
+}
+button:hover { 
+    background: var(--accent-hover); 
+}
+.ad-slot {
+    width: 100%; 
+    height: 90px; 
+    background: #222; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: #555; 
+    border: 1px solid #333; 
+    margin-top: 40px; 
+    border-radius: 6px;
+}
+.footer-links { 
+    text-align: center; 
+    font-size: 0.9rem; 
+    margin-top: 40px; 
+}
+.footer-links a { 
+    color: var(--text-color); 
+    text-decoration: none; 
+}
+</style>
+</head>
+<body>
+
+<nav>
+    <a href="#category-resizer">Resizer</a>
+    <a href="#category-cleanup">Cleanup Tools</a>
+</nav>
+
+<main>
+<p class="seo-text">Image Quick Fix instantly resizes your images right on your device. Generate perfectly proportioned PWA icons and marketing assets directly in your browser. No uploads to a server, ensuring your content stays private and the process remains lightning fast.</p>
+
+<div class="upload-area" id="drop-zone">
+    <label class="upload-btn">
+        Select Image
+        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+    </label>
+    <p style="color:#888;margin-top:15px;">or drag and drop here</p>
+</div>
+
+<div class="preview-container" id="previewContainer">
+    <img id="preview" src="" alt="Image preview">
+    <div class="controls">
+        <button onclick="downloadIcon(192)">Download 192x192</button>
+        <button onclick="downloadIcon(512)">Download 512x512</button>
+        <button onclick="generateAllIcons()">Generate All Icons → ZIP</button>
+    </div>
+    <button onclick="shareImage()" style="background-color:#333;color:white;">Share Image</button>
+</div>
+
+<div class="ad-slot">Advertisement Slot</div>
+
+<div class="footer-links">
+    <a href="https://ko-fi.com/" target="_blank">☕ Support on Ko-fi</a>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+const imageInput = document.getElementById('imageInput');
+const preview = document.getElementById('preview');
+const previewContainer = document.getElementById('previewContainer');
+const dropZone = document.getElementById('drop-zone');
+let currentImage = null;
+
+function handleImage(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            currentImage = img;
+            preview.src = e.target.result;
+            previewContainer.style.display = 'flex';
+            dropZone.style.display = 'none';
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Event Listeners
+imageInput.addEventListener('change', e => handleImage(e.target.files[0]));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); });
+
+// Centralized drawing function
+function drawToCanvas(size) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    
+    // Improve downscaling quality
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    const scale = Math.max(size / currentImage.width, size / currentImage.height);
+    const w = currentImage.width * scale;
+    const h = currentImage.height * scale;
+    const x = (size - w) / 2;
+    const y = (size - h) / 2;
+    
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, x, y, w, h);
+    return canvas;
+}
+
+function downloadIcon(size) {
+    if (!currentImage) return;
+    const canvas = drawToCanvas(size);
+
+    canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon-${size}x${size}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png');
+}
+
+async function generateAllIcons() {
+    if (!currentImage) return;
+    const sizes = [48, 72, 96, 144, 192, 512];
+    const zip = new JSZip();
+
+    for (const size of sizes) {
+        const canvas = drawToCanvas(size);
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        zip.file(`icon-${size}x${size}.png`, blob);
+    }
+
+    zip.generateAsync({type: "blob"}).then(content => {
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url; 
+        a.download = 'pwa-icons.zip';
+        document.body.appendChild(a); 
+        a.click(); 
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+}
+
+// Fixed Web Share API
+async function shareImage() {
+    if (!currentImage) return;
+    
+    const canvas = drawToCanvas(512);
+    
+    canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'shared-image.png', { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    title: 'Image Quick Fix',
+                    text: 'Here is the resized asset.',
+                    files: [file]
+                });
+            } catch (err) {
+                console.log('Share failed:', err);
+            }
+        } else {
+            alert('File sharing is not supported on this browser/device.');
+        }
+    }, 'image/png');
+}
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/imagequickfix/sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+</script>
+</body>
+</html>
