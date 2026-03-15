@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>P90 Beta</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { --blue: #3b82f6; --bg: #000; --red: #ef4444; }
+        body { background: var(--bg); color: #fff; font-family: -apple-system, system-ui, sans-serif; 
+               display: flex; align-items: center; justify-content: center; height: 100dvh; margin: 0; overflow: hidden; }
+        #app { text-align: center; width: 90%; max-width: 400px; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .circle-wrap { height: 220px; display: flex; align-items: center; justify-content: center; margin: 1rem 0; }
+        .circle { width: 100px; height: 100px; border: 4px solid var(--blue); border-radius: 50%; 
+                   transition: transform 4s ease-in-out; box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+        .inhale { transform: scale(1.9); }
+        .btn { background: var(--blue); color: #fff; border: none; padding: 1.2rem 2.4rem; 
+               border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
+        .secondary { background: transparent; border: 1px solid #444; }
+        .hidden { display: none; }
+        #msg { font-size: 1.8rem; font-weight: 300; min-height: 1.6em; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        .beta-warning { position: absolute; bottom: 30px; left: 0; right: 0; font-size: 0.65rem; color: var(--red); 
+                        text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; padding: 0 20px; line-height: 1.4; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="gate">
+            <h1 style="margin-bottom: 0.5rem;">Pause90</h1>
+            <p style="color: #888; margin-bottom: 2rem;">Biological Transition Utility</p>
+            <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 1.5rem; line-height: 1.4;">Note: If you feel lightheaded, stop the cycle immediately.</p>
+            <button class="btn" onclick="init()">Start Beta Session</button>
+        </div>
+
+        <div id="active" class="hidden">
+            <p id="msg"></p>
+            <div class="circle-wrap"><div id="ball" class="circle"></div></div>
+        </div>
+
+        <div id="decision" class="hidden">
+            <p id="checkin" style="font-size: 1.2rem; margin-bottom: 1.5rem;">Initial reset complete.</p>
+            <button class="btn" onclick="exit()">I'm Ready</button>
+            <button class="btn secondary" onclick="moreTime()">Need 2 More Cycles</button>
+        </div>
+
+        <div class="beta-warning">
+            BETA TEST PHASE: THIS TOOL IS NOT AUTHORIZED FOR PUBLIC USE. <br>USE AT YOUR OWN RISK.
+        </div>
+    </div>
+
+    <script>
+        let synth = window.speechSynthesis;
+        function speak(t) {
+            if (!synth) return;
+            synth.cancel(); // Clear queue
+            let m = new SpeechSynthesisUtterance(t);
+            m.rate = 0.85; m.pitch = 0.9; m.volume = 0.7;
+            synth.speak(m);
+        }
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function runStep(text, isExhale, ms) {
+            document.getElementById('msg').innerText = text;
+            const ball = document.getElementById('ball');
+            // 4-7-8 logic: Only inhale scales up. Hold and Exhale stay or scale down.
+            if (text === "Inhale") ball.classList.add('inhale');
+            if (text === "Exhale") ball.classList.remove('inhale');
+            await sleep(ms);
+        }
+
+        async function startSession(cycles) {
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('decision').classList.add('hidden');
+            document.getElementById('active').classList.remove('hidden');
+            
+            for(let i=0; i < cycles; i++) {
+                await runStep("Inhale", false, 4000);
+                await runStep("Hold", false, 7000);
+                await runStep("Exhale", true, 8000);
+            }
+            finish();
+        }
+
+        function init() { 
+            speak("Begin reset. Stop if you feel lightheaded."); 
+            startSession(4); 
+        }
+        
+        function finish() {
+            document.getElementById('active').classList.add('hidden');
+            document.getElementById('decision').classList.remove('hidden');
+            speak("Time is up. Are you ready, or do you need more time?");
+        }
+
+        function moreTime() { 
+            speak("Adding two cycles."); 
+            startSession(2); 
+        }
+        
+        function exit() {
+            speak("Ready. Proceed with intention.");
+            setTimeout(() => location.reload(), 2500);
+        }
+
+        if ('serviceWorker' in navigator) { 
+            navigator.serviceWorker.register('sw.js').catch(err => console.log(err)); 
+        }
+    </script>
+</body>
+</html>

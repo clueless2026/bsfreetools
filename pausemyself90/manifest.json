@@ -1,0 +1,15 @@
+{
+  "name": "Pause90 Beta",
+  "short_name": "P90Beta",
+  "start_url": "/pause/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/512/3b82f6/ffffff?text=P90",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
