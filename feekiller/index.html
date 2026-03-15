@@ -239,7 +239,19 @@ function addSub(name,price){
 }
 
 form.addEventListener('submit',(e)=>{e.preventDefault(); addSub(nInput.value,pInput.value); nInput.value=''; pInput.value=''; nInput.focus();});
-document.getElementById('chipContainer').addEventListener('click',(e)=>{if(e.target.classList.contains('chip')){addSub(e.target.dataset.name,e.target.dataset.price);}});
+
+// CLICK LISTENER UPDATED HERE
+document.getElementById('chipContainer').addEventListener('click',(e)=>{
+  if(e.target.classList.contains('chip')){
+    // Fill the inputs instead of instantly submitting
+    nInput.value = e.target.dataset.name;
+    pInput.value = e.target.dataset.price;
+    // Focus the price field so the user can edit it, or just hit Enter
+    pInput.focus();
+    pInput.select();
+  }
+});
+
 document.getElementById('btnLoadAverage').addEventListener('click',()=>{subs=[{name:"Streaming Bundle",price:25,id:Date.now()+1},{name:"Gym & Fitness",price:45,id:Date.now()+2},{name:"Cloud Storage",price:10,id:Date.now()+3}]; saveAndRender();});
 
 function renderList(){
