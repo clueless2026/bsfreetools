@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Getitdone | The No-BS Action Tracker</title>
+    
+    <meta name="description" content="Getitdone: High-velocity task tracking with manual bulk management. Privacy-first PWA for bsfreetools.com.">
+    <link rel="canonical" href="https://bsfreetools.com/getitdone">
+    
+    <style>
+        :root {
+            --bg: #0A0A0A;
+            --gold: #FFD700;
+            --text: #FFFFFF;
+            --card: #141414;
+            --border: #222222;
+            --overdue: #FF4444;
+            --select-bg: #1A1A00;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { width: 100%; max-width: 480px; }
+
+        header { text-align: center; margin-bottom: 25px; }
+        h1 { color: var(--gold); font-size: 3.2rem; margin: 0; letter-spacing: -4px; font-weight: 900; }
+        .tagline { color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Dashboard */
+        .dashboard {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .stat-box { text-align: center; }
+        .stat-val { display: block; font-size: 2rem; font-weight: 900; color: var(--gold); }
+        .stat-lbl { font-size: 0.6rem; color: #555; text-transform: uppercase; }
+
+        /* Input Section */
+        .input-stack {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border);
+            color: white;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .input-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="date"] {
+            background: #222;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        #push-btn {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        /* Bulk Actions Bar */
+        .bulk-bar {
+            display: none;
+            background: var(--select-bg);
+            border: 1px solid var(--gold);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* List */
+        .item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .item.selected { border-color: var(--gold); background: var(--select-bg); }
+        .item.urgent { border-left: 4px solid var(--overdue); }
+        .item.done .task-name { text-decoration: line-through; color: #444; }
+
+        .check-circ {
+            width: 28px; height: 28px; border: 2px solid var(--gold);
+            border-radius: 50%; flex-shrink: 0; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .check-circ.checked { background: var(--gold); }
+        .check-circ.checked::after { content: '✓'; color: black; font-weight: bold; }
+
+        .bulk-check {
+            width: 20px; height: 20px; accent-color: var(--gold);
+        }
+
+        .info { flex: 1; cursor: pointer; }
+        .task-name { display: block; font-size: 1.05rem; font-weight: 600; }
+        .task-date { font-size: 0.75rem; color: #666; font-weight: bold; margin-top: 2px; }
+        .overdue-lbl { color: var(--overdue); margin-left: 6px; }
+
+        /* Footer Controls */
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-sec {
+            background: none;
+            border: 1px solid var(--border);
+            color: #666;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-sec.active { border-color: var(--gold); color: var(--gold); }
+
+        .seo-box { font-size: 0.85rem; color: #555; text-align: center; margin-top: 40px; padding: 25px; border-top: 1px solid #111; line-height: 1.7; }
+        
+        nav { margin-top: 20px; text-align: center; }
+        nav a { color: var(--gold); text-decoration: none; margin: 0 12px; font-size: 0.85rem; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>GETITDONE</h1>
+        <p class="tagline">The No-BS Execution Protocol</p>
+    </header>
+
+    <div class="dashboard">
+        <div class="stat-box">
+            <span class="stat-val" id="count-active">0</span>
+            <span class="stat-lbl">Active</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-val" id="score-momentum">0%</span>
+            <span class="stat-lbl">Momentum</span>
+        </div>
+    </div>
+
+    <div class="input-stack">
+        <input type="text" id="taskIn" placeholder="Objective name..." maxlength="60">
+        <div class="input-meta">
+            <input type="date" id="dateIn">
+            <button id="push-btn">PUSH</button>
+        </div>
+    </div>
+
+    <div class="bulk-bar" id="bulkBar">
+        <span id="selectCount" style="font-size: 0.8rem; font-weight: bold; color: var(--gold);">0 Selected</span>
+        <button onclick="deleteSelected()" style="background: var(--overdue); color: white; border: none; padding: 5px 12px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; cursor: pointer;">DELETE SELECTED</button>
+    </div>
+
+    <div id="listBody"></div>
+
+    <div class="actions">
+        <button class="btn-sec" id="editBtn" onclick="toggleEditMode()">MANAGE LIST</button>
+        <button class="btn-sec" onclick="exportData()">EXPORT REPORT</button>
+    </div>
+
+    <div class="seo-box">
+        Getitdone is a privacy-first Progressive Web App (PWA) specifically designed for the bsfreetools.com ecosystem. It provides high-velocity task tracking with manual bulk-deletion controls, ensuring the user remains in complete command of their data. By storing all mission-critical deadlines locally, Getitdone eliminates the risk of external data tracking while helping users maintain a high momentum score through consistent, visible progress tracking and overdue alerts.
+    </div>
+
+    <nav>
+        <a href="https://bsfreetools.com">HOME</a>
+        <a href="#productivity">CATEGORY: PRODUCTIVITY</a>
+    </nav>
+</div>
+
+<script>
+    const taskIn = document.getElementById('taskIn');
+    const dateIn = document.getElementById('dateIn');
+    const pushBtn = document.getElementById('push-btn');
+    const listBody = document.getElementById('listBody');
+    const activeEl = document.getElementById('count-active');
+    const momentumEl = document.getElementById('score-momentum');
+    const bulkBar = document.getElementById('bulkBar');
+    const selectCount = document.getElementById('selectCount');
+    const editBtn = document.getElementById('editBtn');
+
+    let tasks = JSON.parse(localStorage.getItem('gid_vfinal')) || [];
+    let editMode = false;
+    let selectedIndices = new Set();
+
+    function update() {
+        const active = tasks.filter(t => !t.done).length;
+        const total = tasks.length;
+        const score = total === 0 ? 0 : Math.round(((total - active) / total) * 100);
+        activeEl.innerText = active;
+        momentumEl.innerText = score + '%';
+        localStorage.setItem('gid_vfinal', JSON.stringify(tasks));
+    }
+
+    function render() {
+        listBody.innerHTML = '';
+        const today = new Date().toISOString().split('T')[0];
+
+        tasks.forEach((t, i) => {
+            const isOverdue = t.date && t.date < today && !t.done;
+            const div = document.createElement('div');
+            div.className = `item ${t.done ? 'done' : ''} ${isOverdue ? 'urgent' : ''} ${selectedIndices.has(i) ? 'selected' : ''}`;
+            
+            div.innerHTML = `
+                ${editMode ? `<input type="checkbox" class="bulk-check" onchange="toggleSelect(${i})" ${selectedIndices.has(i) ? 'checked' : ''}>` : 
+                `<div class="check-circ ${t.done ? 'checked' : ''}" onclick="toggleDone(${i})"></div>`}
+                <div class="info" onclick="${editMode ? `toggleSelect(${i})` : `toggleDone(${i})`}">
+                    <span class="task-name">${t.text}</span>
+                    <span class="task-date">${t.date ? t.date : 'ASAP'} 
+                        ${isOverdue ? '<span class="overdue-lbl">OVERDUE</span>' : ''}
+                    </span>
+                </div>
+            `;
+            listBody.appendChild(div);
+        });
+        
+        selectCount.innerText = `${selectedIndices.size} Selected`;
+        bulkBar.style.display = (editMode && tasks.length > 0) ? 'flex' : 'none';
+        update();
+    }
+
+    function add() {
+        if (taskIn.value.trim()) {
+            tasks.unshift({ text: taskIn.value.trim(), date: dateIn.value, done: false });
+            taskIn.value = '';
+            dateIn.value = '';
+            render();
+        }
+    }
+
+    window.toggleDone = (i) => { tasks[i].done = !tasks[i].done; render(); };
+    
+    window.toggleEditMode = () => {
+        editMode = !editMode;
+        selectedIndices.clear();
+        editBtn.innerText = editMode ? "EXIT MANAGEMENT" : "MANAGE LIST";
+        editBtn.classList.toggle('active');
+        render();
+    };
+
+    window.toggleSelect = (i) => {
+        if (selectedIndices.has(i)) selectedIndices.delete(i);
+        else selectedIndices.add(i);
+        render();
+    };
+
+    window.deleteSelected = () => {
+        if (selectedIndices.size === 0) return;
+        if (confirm(`Delete ${selectedIndices.size} tasks?`)) {
+            tasks = tasks.filter((_, i) => !selectedIndices.has(i));
+            selectedIndices.clear();
+            render();
+        }
+    };
+
+    window.exportData = () => {
+        const txt = tasks.map(t => `${t.done ? '[X]' : '[ ]'} ${t.text} (${t.date || 'ASAP'})`).join('\n');
+        navigator.clipboard.writeText(`Getitdone Report:\n${txt}`);
+        alert('Report copied!');
+    };
+
+    pushBtn.addEventListener('click', add);
+    render();
+</script>
+
+</body>
+</html>
