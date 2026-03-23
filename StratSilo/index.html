@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>StratSilo | Tactical Operations Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --ion-safe-area-top: 20px; --ion-safe-area-bottom: 20px; }
+        body { -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #cbd5e1; }
+        .day-cell { min-height: 110px; background: white; padding: 8px; position: relative; cursor: pointer; transition: background 0.2s; }
+        .day-cell:active { background: #f8fafc; }
+        .active-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; margin: 4px auto; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        [contenteditable]:empty:before { content: attr(placeholder); color: #cbd5e1; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 h-screen flex flex-col">
+
+    <nav class="bg-white border-b px-6 pt-12 pb-4 flex justify-between items-end shadow-sm z-50">
+        <div>
+            <select id="activeProject" onchange="renderCalendar()" class="font-black text-2xl text-indigo-600 outline-none bg-transparent max-w-[180px]"></select>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">StratSilo Engine v1.0.7</p>
+        </div>
+        <button onclick="toggleVault()" class="p-2 px-4 bg-slate-50 rounded-xl border font-black text-[10px] uppercase text-indigo-600">🛡️ Vault</button>
+    </nav>
+
+    <div class="px-6 py-4 flex justify-between items-center bg-white border-b">
+        <h2 id="monthLabel" class="text-3xl font-black italic text-slate-800">Month</h2>
+        <div class="flex gap-6 font-bold text-slate-400 text-[10px] uppercase tracking-widest">
+            <button onclick="changeMonth(-1)">Prev</button>
+            <button onclick="changeMonth(1)">Next</button>
+        </div>
+    </div>
+
+    <main class="flex-1 overflow-y-auto no-scrollbar max-w-md mx-auto w-full">
+        <div id="calendarGrid" class="calendar-grid"></div>
+        <div class="p-8 text-[11px] text-slate-400 leading-relaxed italic text-center">
+            <strong>StratSilo</strong>: Private Execution Hub for Mac & iPad.
+        </div>
+    </main>
+
+    <div id="vaultMenu" class="fixed inset-0 bg-black/50 z-[130] hidden flex items-center justify-center p-6 text-center">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl safe-bottom">
+            <h3 class="font-black text-2xl mb-2">StratSilo Vault 🛡️</h3>
+            <p id="lastBackupText" class="text-[11px] text-slate-400 mb-6 italic">No backup yet</p>
+            <div class="space-y-3 text-left">
+                <div class="p-3 bg-indigo-50 rounded-xl mb-2 border border-indigo-100 text-[10px] text-indigo-700">
+                    <strong>Mac Tip:</strong> Use AirDrop to send your Exported file to your iPad instantly.
+                </div>
+                <button onclick="backupJSON(true)" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg">Export StratSilo File</button>
+                <label class="block w-full py-4 bg-slate-100 text-slate-600 text-center rounded-2xl font-black cursor-pointer">
+                    Restore from File
+                    <input type="file" id="restoreFile" class="hidden" onchange="restoreData(this)">
+                </label>
+                <button onclick="toggleVault()" class="w-full py-2 text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Close Vault</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editorModal" class="fixed inset-0 bg-white z-[100] hidden flex flex-col transition-transform transform translate-y-full">
+        <header class="p-6 pt-12 border-b flex justify-between items-center bg-white shadow-sm sticky top-0">
+            <button onclick="closeEditor()" class="text-indigo-600 font-bold">Done</button>
+            <h3 id="editDate" class="font-black text-slate-400 uppercase text-[10px]">Date</h3>
+            <button onclick="saveNote()" class="bg-indigo-600 text-white px-8 py-2 rounded-full font-bold">Save</button>
+        </header>
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <div id="strategySurface" contenteditable="true" placeholder="Enter strategy..." class="min-h-[400px] outline-none text-xl leading-relaxed text-slate-800"></div>
+            <div class="pt-6 border-t pb-12">
+                <label class="text-[10px] font-black text-slate-300 uppercase">Asset Links</label>
+                <textarea id="assetLinks" rows="2" class="w-full bg-slate-50 p-4 rounded-xl text-xs font-mono outline-none" placeholder="Paste links here..."></textarea>
+            </div>
+        </div>
+        <div class="p-4 bg-slate-50 border-t flex justify-between items-center safe-bottom">
+            <div class="flex items-center gap-2">
+                <div id="savePulse" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">StratSilo Active</span>
+            </div>
+            <span id="saveStatus" class="text-[9px] font-black text-emerald-600 uppercase">✅ Saved to Browser</span>
+        </div>
+    </div>
+
+    <script>
+        let db;
+        let hasChanges = false;
+        try {
+            db = JSON.parse(localStorage.getItem('hub_db')) || { entries: {} };
+        } catch(e) { db = { entries: {} }; }
+
+        let config = JSON.parse(localStorage.getItem('hub_config')) || { 
+            projects: ["PROJECT A", "PROJECT B", "PROJECT C"], 
+            headings: "SHOOT,DRAFT,ADMIN" 
+        };
+        let viewDate = new Date();
+        let activeKey = null;
+
+        // AUTO-SAVE LOGIC
+        document.getElementById('strategySurface').addEventListener('input', () => {
+            const status = document.getElementById('saveStatus');
+            const pulse = document.getElementById('savePulse');
+            status.innerText = "✍️ Typing...";
+            status.style.color = "#f59e0b";
+            pulse.style.backgroundColor = "#f59e0b";
+            clearTimeout(window.saveTimer);
+            window.saveTimer = setTimeout(() => {
+                status.innerText = "✅ Saved to Browser";
+                status.style.color = "#059669";
+                pulse.style.backgroundColor = "#10b981";
+                saveNoteSilent();
+            }, 800);
+        });
+
+        function saveNoteSilent() {
+            const client = document.getElementById('activeProject').value;
+            if(!db.entries[client]) db.entries[client] = {};
+            db.entries[client][activeKey] = {
+                html: document.getElementById('strategySurface').innerHTML,
+                links: document.getElementById('assetLinks').value
+            };
+            localStorage.setItem('hub_db', JSON.stringify(db));
+            hasChanges = true;
+        }
+
+        async function backupJSON(isManual = false) {
+            if (!isManual && !hasChanges) return;
+            const data = JSON.stringify(db);
+            // TIMESTAMP FILENAME FOR MAC ORGANIZATION
+            const d = new Date();
+            const stamp = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}_${d.getHours()}-${d.getMinutes()}`;
+            const fileName = `STRATSILO_${stamp}.json`;
+            const blob = new Blob([data], { type: "application/json" });
+
+            if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: "application/json" })] })) {
+                try {
+                    await navigator.share({ title: "StratSilo Backup", files: [new File([blob], fileName, { type: "application/json" })] });
+                } catch (e) { console.log("Share failed"); }
+            } else {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = fileName; a.click();
+            }
+            hasChanges = false;
+            localStorage.setItem('last_backup', new Date().toISOString());
+            updateBackupUI();
+        }
+
+        function restoreData(input) {
+            if (!confirm("Replace data with this file?")) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    db = JSON.parse(e.target.result);
+                    localStorage.setItem('hub_db', JSON.stringify(db));
+                    alert("StratSilo Updated!");
+                    location.reload();
+                } catch(err) { alert("Invalid File."); }
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function saveNote() { saveNoteSilent(); renderCalendar(); closeEditor(); }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const client = document.getElementById('activeProject').value;
+            grid.innerHTML = '';
+            const m = viewDate.getMonth(), y = viewDate.getFullYear();
+            document.getElementById('monthLabel').innerText = viewDate.toLocaleString('en-US', { month: 'long' });
+            const last = new Date(y, m + 1, 0).getDate();
+            for(let d=1; d<=last; d++) {
+                const key = `${y}-${m+1}-${d}`;
+                const hasData = db.entries[client] && db.entries[client][key];
+                grid.innerHTML += `<div onclick="openEditor('${key}')" class="day-cell border-b border-r">
+                    <span class="text-xs font-black text-slate-200">${d}</span>
+                    ${hasData ? '<div class="active-dot"></div>' : ''}
+                </div>`;
+            }
+            updateBackupUI();
+        }
+
+        function updateBackupUI() {
+            const last = localStorage.getItem('last_backup');
+            if (last) document.getElementById('lastBackupText').innerText = "Last Backup: " + new Date(last).toLocaleString();
+        }
+
+        setInterval(() => { backupJSON(false); }, 10 * 60 * 1000);
+        window.onload = () => {
+            const sel = document.getElementById('activeProject');
+            sel.innerHTML = config.projects.map(p => `<option value="${p}">${p}</option>`).join('');
+            renderCalendar();
+        };
+
+        function toggleVault() { document.getElementById('vaultMenu').classList.toggle('hidden'); }
+        function openEditor(key) { 
+            activeKey = key; 
+            const client = document.getElementById('activeProject').value;
+            const entry = (db.entries[client] && db.entries[client][key]) || { html: '', links: '' };
+            document.getElementById('strategySurface').innerHTML = entry.html;
+            document.getElementById('assetLinks').value = entry.links;
+            document.getElementById('editDate').innerText = key;
+            document.getElementById('editorModal').classList.remove('hidden'); 
+            setTimeout(() => document.getElementById('editorModal').classList.remove('translate-y-full'), 10);
+        }
+        function closeEditor() { document.getElementById('editorModal').classList.add('translate-y-full'); setTimeout(() => document.getElementById('editorModal').classList.add('hidden'), 300); }
+        function changeMonth(d) { viewDate.setMonth(viewDate.getMonth() + d); renderCalendar(); }
+    </script>
+</body>
+</html>

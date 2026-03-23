@@ -1,0 +1,12 @@
+PROPRIETARY SOFTWARE — NOT OPEN SOURCE
+
+Copyright © 2026 Sovereign Ledger. All Rights Reserved.
+
+This software and its source code are proprietary and confidential. This is NOT open
+source software. No license is granted to copy, modify, distribute, reverse engineer,
+decompile, or create derivative works, except as expressly permitted in writing by the
+copyright holder.
+
+Unauthorized use, duplication, or reverse engineering is prohibited.
+
+For licensing inquiries, contact the copyright holder.

@@ -1,0 +1,30 @@
+const categorySeeds = [
+  { name: 'Rental Income', transaction_type: 'Income' },
+  { name: 'CAM / Reimbursements', transaction_type: 'Income' },
+  { name: 'CAM Reconciliation', transaction_type: 'Income' },
+  { name: 'Late Fees', transaction_type: 'Income' },
+  { name: 'Other Income', transaction_type: 'Income' },
+  { name: 'Repairs & Maintenance', transaction_type: 'PAndL' },
+  { name: 'Cleaning & Janitorial', transaction_type: 'PAndL' },
+  { name: 'Landscaping', transaction_type: 'PAndL' },
+  { name: 'Utilities', transaction_type: 'PAndL' },
+  { name: 'Trash Removal', transaction_type: 'PAndL' },
+  { name: 'Mortgage Interest', transaction_type: 'PAndL' },
+  { name: 'Property Taxes', transaction_type: 'PAndL' },
+  { name: 'Insurance', transaction_type: 'PAndL' },
+  { name: 'Property Management Fees', transaction_type: 'PAndL' },
+  { name: 'Legal & Professional Fees', transaction_type: 'PAndL' },
+  { name: 'Accounting', transaction_type: 'PAndL' },
+  { name: 'Commissions / Leasing Fees', transaction_type: 'PAndL' },
+  { name: 'Advertising', transaction_type: 'PAndL' },
+  { name: 'Supplies', transaction_type: 'PAndL' },
+  { name: 'Capital Expenditures (CapEx)', transaction_type: 'PAndL' },
+  { name: 'Miscellaneous', transaction_type: 'PAndL' },
+  { name: 'Depreciation', transaction_type: 'PAndL' },
+  { name: 'Mortgage Principal', transaction_type: 'CashFlowOnly' },
+]
+
+export const seedCategories = categorySeeds.map((category) => ({
+  id: crypto.randomUUID(),
+  ...category,
+}))

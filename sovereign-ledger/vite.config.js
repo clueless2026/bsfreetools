@@ -1,0 +1,28 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { sovereignObfuscatePlugin } from './vite-plugins/sovereignObfuscate.js'
+
+// https://vite.dev/config/
+export default defineConfig(({ mode }) => {
+  const isProd = mode === 'production'
+
+  return {
+    plugins: [react(), ...(isProd ? [sovereignObfuscatePlugin()] : [])],
+    build: {
+      /** Obfuscation increases JS size; raise limit for single-bundle apps */
+      chunkSizeWarningLimit: 1200,
+      minify: 'terser',
+      sourcemap: false,
+      terserOptions: {
+        compress: {
+          drop_console: isProd,
+          drop_debugger: isProd,
+          passes: 2,
+        },
+        format: {
+          comments: false,
+        },
+      },
+    },
+  }
+})

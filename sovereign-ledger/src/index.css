@@ -1,0 +1,627 @@
+:root {
+  /* Slate palette — forms & dark surfaces */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+  --input-bg: var(--slate-800);
+  --input-border: var(--slate-700);
+  --input-text: var(--slate-200);
+  --input-placeholder: var(--slate-500);
+  --btn-add: #2563eb;
+  --btn-add-hover: #1d4ed8;
+  --btn-danger-bg: #450a0a;
+  --btn-danger-border: #991b1b;
+  --btn-danger-text: #fecaca;
+
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+/* Sovereign Ledger — dark pages & slate inputs */
+.sovereign-page {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  text-align: left;
+  max-width: 100%;
+  margin-inline: auto;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.sovereign-page--wide {
+  width: 100%;
+}
+
+.sovereign-page .sovereign-page-title {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--slate-100);
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.sovereign-section-heading {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--slate-400);
+  line-height: 1.3;
+}
+
+.sovereign-quick-add {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-700);
+  background: var(--slate-900);
+  width: 100%;
+  min-width: 0;
+}
+
+.sovereign-form-row {
+  margin-bottom: 0.75rem;
+}
+
+.sovereign-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-400);
+  margin-bottom: 0.35rem;
+}
+
+.sovereign-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--input-text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 0.375rem;
+  outline: none;
+}
+
+.sovereign-input::placeholder {
+  color: var(--input-placeholder);
+}
+
+.sovereign-input:focus {
+  border-color: var(--slate-500);
+  box-shadow: 0 0 0 2px rgba(51, 65, 85, 0.5);
+}
+
+.sovereign-select {
+  cursor: pointer;
+  appearance: auto;
+}
+
+.sovereign-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sovereign-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: var(--slate-500);
+}
+
+.sovereign-btn {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.sovereign-btn-add {
+  background: var(--btn-add);
+  color: #ffffff;
+  border-color: var(--btn-add-hover);
+}
+
+.sovereign-btn-add:hover {
+  background: var(--btn-add-hover);
+}
+
+.sovereign-btn-secondary {
+  background: var(--slate-800);
+  color: var(--slate-200);
+  border-color: var(--slate-600);
+}
+
+.sovereign-btn-secondary:hover {
+  background: var(--slate-700);
+}
+
+.sovereign-btn-danger {
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-text);
+  border-color: var(--btn-danger-border);
+  flex-shrink: 0;
+}
+
+.sovereign-btn-danger:hover {
+  background: #7f1d1d;
+  border-color: #b91c1c;
+}
+
+.sovereign-muted {
+  color: var(--slate-500);
+  margin: 0;
+}
+
+.sovereign-property-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sovereign-property-list .sovereign-property-card {
+  width: 100%;
+}
+
+.sovereign-property-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-700);
+  background: var(--slate-900);
+}
+
+.sovereign-property-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.sovereign-property-name {
+  color: var(--slate-100);
+  font-size: 1rem;
+}
+
+.sovereign-property-address {
+  color: var(--slate-400);
+  font-size: 0.875rem;
+}
+
+.sovereign-tenant-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sovereign-tenant-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-700);
+  background: var(--slate-900);
+  text-align: left;
+}
+
+.sovereign-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Dashboard summary cards */
+.sovereign-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.sovereign-summary-card {
+  border-radius: 0.75rem;
+  padding: 1rem;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--slate-700);
+  background: var(--slate-900);
+  text-align: left;
+}
+
+.sovereign-summary-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--slate-300);
+}
+
+.sovereign-summary-amount {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0.35rem 0;
+}
+
+.sovereign-summary-sub {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--slate-500);
+  line-height: 1.35;
+}
+
+.sovereign-text-income {
+  color: #4ade80;
+}
+
+.sovereign-text-expense {
+  color: #f87171;
+}
+
+.sovereign-summary-pandl-value {
+  color: #ffffff;
+}
+
+.sovereign-text-cashflow {
+  color: #93c5fd;
+}
+
+.ledger-icon-income {
+  color: #4ade80;
+  flex-shrink: 0;
+}
+
+.ledger-icon-expense {
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.sovereign-code-inline {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: var(--slate-800);
+  color: var(--slate-200);
+}
+
+/* Ledger table */
+.ledger-table-wrap {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--slate-700);
+  width: 100%;
+}
+
+.ledger-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ledger-table th,
+.ledger-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--slate-800);
+}
+
+.ledger-table th {
+  color: var(--slate-400);
+  font-weight: 600;
+  background: var(--slate-950);
+}
+
+.ledger-th-amount,
+.ledger-td-amount {
+  text-align: right;
+}
+
+.ledger-type-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ledger-row-income .ledger-td-amount {
+  color: #4ade80;
+}
+
+.ledger-row-expense .ledger-td-amount {
+  color: #f87171;
+}
+
+.ledger-row-income td:not(.ledger-td-amount) {
+  color: var(--slate-200);
+}
+
+.ledger-row-expense td:not(.ledger-td-amount) {
+  color: var(--slate-200);
+}
+
+.sovereign-actions--wrap {
+  align-items: flex-end;
+}
+
+.sovereign-actions--inline {
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+.sovereign-actions--between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sovereign-file-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sovereign-admin-panel {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--slate-700);
+}
+
+.sovereign-admin-toggle {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .sovereign-admin-toggle {
+    width: auto;
+    justify-content: flex-start;
+  }
+}
+
+/* Profit & Loss — full-width landscape-style grid */
+.pl-report-card {
+  width: 100%;
+}
+
+.pl-report-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--slate-700);
+  background: var(--slate-950);
+}
+
+.pl-report-table {
+  min-width: 100%;
+  width: max(100%, 960px);
+  table-layout: auto;
+}
+
+.pl-report-line-col {
+  min-width: 14rem;
+  max-width: 40vw;
+}
+
+.pl-report-num-col {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pl-report-section-row td {
+  background: var(--slate-800);
+  color: var(--slate-100);
+  font-weight: 700;
+  text-align: left;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+.pl-report-bold,
+tr.pl-report-bold td {
+  font-weight: 700;
+  color: var(--slate-50);
+}
+
+/* P&L portrait vs landscape — prevent horizontal bleed when switching modes */
+.sovereign-pl-scope {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sovereign-pl-scope--portrait {
+  overflow-x: hidden;
+}
+
+.sovereign-pl-scope--portrait .pl-report-wrap {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.sovereign-pl-scope--portrait .pl-report-table {
+  width: 100%;
+  min-width: 0;
+}
+
+.sovereign-pl-scope--landscape {
+  overflow-x: hidden;
+}
+
+.sovereign-pl-scope--landscape .pl-report-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.sovereign-report-controls {
+  align-items: flex-end;
+}
+
+.sovereign-admin-heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--slate-200);
+  text-align: left;
+}
+
+.sovereign-proprietary-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--slate-800);
+  text-align: center;
+}
+
+.sovereign-proprietary-footer p {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--slate-500);
+  max-width: 42rem;
+  margin-inline: auto;
+}
