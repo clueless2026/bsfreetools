@@ -1,0 +1,14 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "rewrites": [
+    {
+      "source": "/sovereign-ledger",
+      "destination": "/sovereign-ledger/dist/index.html"
+    },
+    {
+      "source": "/sovereign-ledger/",
+      "destination": "/sovereign-ledger/dist/index.html"
+    }
+  ]
+}
