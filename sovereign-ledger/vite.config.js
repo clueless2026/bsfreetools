@@ -7,6 +7,8 @@ export default defineConfig(({ mode }) => {
   const isProd = mode === 'production'
 
   return {
+    // This ensures the app works when hosted at bsfreetools.com/sovereign-ledger/dist/
+    base: './', 
     plugins: [react(), ...(isProd ? [sovereignObfuscatePlugin()] : [])],
     build: {
       /** Obfuscation increases JS size; raise limit for single-bundle apps */
