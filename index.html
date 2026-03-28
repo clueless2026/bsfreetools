@@ -3,38 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BS Free Tools</title>
+    <title>BSFreeTools | Mission Control | Private Browser Utilities</title>
+    
+    <meta name="description" content="A suite of fast, private tools that run entirely in your web browser. No subscriptions, no cloud tracking, and no file uploads.">
+    <meta name="keywords" content="free pdf tools, browser based tools, private web apps, no upload tools">
+    <link rel="canonical" href="https://bsfreetools.com/">
+    
+    <meta property="og:title" content="BSFreeTools - Mission Control">
+    <meta property="og:description" content="Fast, private tools that process data directly on your device.">
+    <meta property="og:url" content="https://bsfreetools.com/">
+    <meta property="og:type" content="website">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .category-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--card-border); 
+            border-radius: 20px; 
+            padding: 3rem; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-height: 280px;
+            text-decoration: none;
+        }
+
+        .category-card:hover { 
+            border-color: rgba(255,255,255,0.4); 
+            transform: translateY(-4px); 
+            background: rgba(255,255,255,0.04); 
+        }
+
+        .ad-container {
+            width: 100%; max-width: 900px; height: 90px;
+            margin: 60px auto; border: 1px dashed var(--card-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; opacity: 0.3; text-transform: uppercase;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .status-live { background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.2); }
+        .status-dev { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen flex flex-col font-sans">
-    <main class="flex-grow flex flex-col items-center justify-center p-6 text-center">
-        <h1 class="text-5xl font-black tracking-tighter mb-2 uppercase">BS FREE TOOLS</h1>
-        <p class="text-zinc-500 mb-12 max-w-md uppercase text-xs tracking-widest">No Sign-ins. No Tracking. No BS.</p>
+<body class="flex flex-col min-h-screen">
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-            <a href="/sovereign-ledger/index.html" class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-400 transition-all text-left group">
-                <h2 class="text-xl font-bold mb-1">Sovereign Ledger</h2>
-                <p class="text-sm text-zinc-500">Property P&L and asset management.</p>
-            </a>
+    <div class="linear-bg"></div>
 
-            <a href="/StratSilo/index.html" class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-400 transition-all text-left group">
-                <h2 class="text-xl font-bold mb-1">Strategy Silo</h2>
-                <p class="text-sm text-zinc-500">Big 3 framework decision-making engine.</p>
-            </a>
+    <nav class="p-6 flex justify-between items-center border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0 z-50">
+        <span class="text-[10px] font-black tracking-[0.3em] uppercase opacity-80">BSFREETOOLS</span>
+    </nav>
 
-            <a href="/social-media-consultant/index.html" class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-400 transition-all text-left group">
-                <h2 class="text-xl font-bold mb-1">Social Audit</h2>
-                <p class="text-sm text-zinc-500">Content strategy and engagement audit.</p>
-            </a>
+    <header class="pt-32 pb-16 text-center px-6">
+        <h1 class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter mb-6">MISSION CONTROL</h1>
+        <p class="text-sm font-medium max-w-2xl mx-auto leading-relaxed opacity-60">
+            A fleet of browser-based utilities designed for speed and absolute privacy. Every calculation happens locally on your hardware. No accounts, no subscriptions, no file uploads to our cloud.
+        </p>
+    </header>
 
-            <a href="/fee-killer/index.html" class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-400 transition-all text-left group">
-                <h2 class="text-xl font-bold mb-1">Fee Killer</h2>
-                <p class="text-sm text-zinc-500">Real estate margin and transaction calculator.</p>
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-10 pb-20 w-full">
+        
+        <a href="/pdf/" class="category-card group">
+            <div>
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Suite / 01</span>
+                    <span class="status-badge status-live">Online</span>
+                </div>
+                <h2 class="text-3xl font-black uppercase tracking-tight mb-4">PDF Suite</h2>
+                <p class="text-sm opacity-60 leading-relaxed">7 specialized document utilities. Merge, split, reorder, watermark, and scrub metadata locally.</p>
+            </div>
+            <div class="mt-10 text-[11px] font-black uppercase opacity-0 group-hover:opacity-100 text-emerald-400 transition-opacity">Access Tools →</div>
+        </a>
+
+        <div class="category-card opacity-50 cursor-not-allowed">
+            <div>
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Suite / 02</span>
+                    <span class="status-badge status-dev">In Development</span>
+                </div>
+                <h2 class="text-3xl font-black uppercase tracking-tight mb-4">Sovereign Ledger</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Financial tracking, Burn vs. Earn calculators, and local budgeting tools.</p>
+            </div>
+        </div>
+
+        <div class="category-card opacity-50 cursor-not-allowed">
+            <div>
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40">Suite / 03</span>
+                    <span class="status-badge status-dev">In Development</span>
+                </div>
+                <h2 class="text-3xl font-black uppercase tracking-tight mb-4">Solo Alpha</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Document generators, productivity systems, and lifestyle management modules.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="ad-container">Advertisement Space</div>
+
+    <div class="max-w-4xl mx-auto px-10 pb-20 leading-relaxed text-sm opacity-60 text-center">
+        <h2 class="font-black uppercase tracking-widest text-lg mb-4">The "No BS" Philosophy</h2>
+        <p>
+            BSFreeTools was built to solve a simple problem: the modern web is cluttered with predatory subscriptions, aggressive tracking scripts, and tools that force you to upload your private files to unknown servers. Our architecture uses modern Progressive Web App (PWA) standards to execute all logic—whether it's splitting a PDF or calculating a financial ledger—directly inside your browser's local cache. We use standard ad placements to keep the lights on, but we will never compromise your data sovereignty.
+        </p>
+    </div>
+
+    <footer class="mt-auto py-16 text-center border-t border-white/5">
+        <div class="mb-8">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest border border-white/20 px-8 py-3 rounded-full hover:bg-white hover:text-black transition-all">
+                Support via Ko-fi
             </a>
         </div>
-    </main>
-    <footer class="p-8 text-center text-zinc-700 text-xs uppercase tracking-widest border-t border-zinc-900 mt-12">
-        &copy; 2026 BSFREETOOLS.COM
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-30">Distributed by BSFREETOOLS.COM</p>
     </footer>
+
 </body>
 </html>

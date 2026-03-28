@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge PDF | Private & Free | BSFreeTools</title>
+    
+    <meta name="description" content="Merge multiple PDF files into one instantly in your browser. No file uploads, 100% private and secure.">
+    <link rel="canonical" href="https://bsfreetools.com/pdf/merge/">
+    <meta property="og:title" content="Private PDF Merger - BSFreeTools" />
+    <meta property="og:description" content="Combine PDFs locally. No data leaves your device." />
+    <meta property="og:url" content="https://bsfreetools.com/pdf/merge/" />
+    <meta property="og:type" content="website" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+        }
+
+        [data-theme="light"] {
+            --bg-base: #E2E2E7; 
+            --card-bg: #FFFFFF; 
+            --card-border: rgba(0, 0, 0, 0.12);
+            --text-main: #1D1D1F;
+            --text-secondary: #424245;
+            --nav-bg: rgba(226, 226, 231, 0.8);
+            --hover-light: #F5F5F7;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 160px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--text-main);
+            background: var(--hover-light);
+            transform: scale(1.02);
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.05); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .file-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; background: rgba(255,255,255,0.03);
+            border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--card-border);
+            cursor: grab;
+        }
+        .file-item:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.3; background: var(--text-main); }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/pdf/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO PDF SUITE
+        </a>
+        <div class="flex items-center gap-6">
+            <button onclick="toggleTheme()" class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] border border-[var(--card-border)] px-4 py-2 rounded-full" id="themeBtn">Light Mode</button>
+        </div>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            MERGE PDF
+        </h1>
+        <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Drag and drop your PDFs below. Re-order the list by dragging files up or down to set the merge sequence.
+        </p>
+
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop PDF files here or click to select
+            </p>
+            <input type="file" id="file-input" multiple accept=".pdf" class="hidden" onchange="handleFileSelect(event)">
+        </div>
+
+        <div id="file-list" class="text-left mb-8 max-h-80 overflow-y-auto pr-2">
+            </div>
+
+        <div class="flex flex-col gap-4 items-center">
+            <button id="merge-btn" onclick="processMerge()" class="btn-primary" disabled>
+                Combine Documents
+            </button>
+            <div id="status" class="text-[10px] font-black uppercase tracking-widest text-emerald-500 min-h-[1rem]"></div>
+        </div>
+    </div>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        const { PDFDocument } = PDFLib;
+        let stagedFiles = [];
+        const dropZone = document.getElementById('drop-zone');
+
+        // Initialize Sortable
+        const sortable = new Sortable(document.getElementById('file-list'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: reorderInternalList
+        });
+
+        // 1. DRAG AND DROP HANDLERS (Fixes the "opens in browser" issue)
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            window.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        
+        dropZone.addEventListener('drop', (e) => {
+            dropZone.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+            if(files.length > 0) {
+                stagedFiles = [...stagedFiles, ...files];
+                renderList();
+            }
+        });
+
+        // 2. FILE SELECTION HANDLERS
+        function handleFileSelect(e) {
+            const newFiles = Array.from(e.target.files);
+            stagedFiles = [...stagedFiles, ...newFiles];
+            renderList();
+            e.target.value = ''; // Reset input so same file can be added again if needed
+        }
+
+        function renderList() {
+            const listContainer = document.getElementById('file-list');
+            const btn = document.getElementById('merge-btn');
+            const label = document.getElementById('file-label');
+            
+            listContainer.innerHTML = '';
+            
+            stagedFiles.forEach((f, index) => {
+                const item = document.createElement('div');
+                item.className = "file-item";
+                item.setAttribute('data-id', index);
+                item.innerHTML = `
+                    <div class="flex items-center gap-4 pointer-events-none">
+                        <span class="text-[10px] font-black opacity-30">#${index + 1}</span>
+                        <span class="text-sm font-bold text-[var(--text-main)] truncate max-w-[350px]">${f.name}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-[10px] opacity-40 font-mono">${(f.size / 1024 / 1024).toFixed(2)}MB</span>
+                        <button onclick="event.stopPropagation(); removeFile(${index})" class="text-rose-500 text-[10px] font-black uppercase tracking-tighter hover:opacity-100 opacity-50 transition-opacity pointer-events-auto">Remove</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+            
+            btn.disabled = stagedFiles.length < 2;
+            label.textContent = stagedFiles.length > 0 ? `${stagedFiles.length} FILES STAGED` : `DROP PDF FILES HERE OR CLICK TO SELECT`;
+        }
+
+        function reorderInternalList() {
+            const items = document.querySelectorAll('.file-item');
+            const newList = [];
+            items.forEach(item => {
+                const oldIndex = parseInt(item.getAttribute('data-id'));
+                newList.push(stagedFiles[oldIndex]);
+            });
+            stagedFiles = newList;
+            renderList();
+        }
+
+        function removeFile(index) {
+            stagedFiles.splice(index, 1);
+            renderList();
+        }
+
+        // 3. MERGE LOGIC
+        async function processMerge() {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('merge-btn');
+
+            try {
+                btn.disabled = true;
+                status.textContent = 'Merging locally...';
+                
+                const mergedPdf = await PDFDocument.create();
+
+                for (const file of stagedFiles) {
+                    const bytes = await file.arrayBuffer();
+                    const pdf = await PDFDocument.load(bytes);
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
+
+                const mergedBytes = await mergedPdf.save();
+                download(mergedBytes, "merged_bsfreetools.pdf", "application/pdf");
+                status.textContent = 'SUCCESS: DOWNLOAD STARTED';
+            } catch (e) {
+                status.textContent = 'ERROR: UNABLE TO PROCESS';
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                btn.innerText = 'Light Mode';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = 'Dark Mode';
+            }
+        }
+    </script>
+</body>
+</html>

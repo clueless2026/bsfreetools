@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Doc Scanner | Fix Angles & Scan to PDF | BSFreeTools</title>
+    
+    <meta name="description" content="Turn messy photos of documents into clean, flattened PDFs. Fix bad angles, remove shadows, and apply a high-contrast scan filter entirely in your browser. 100% private.">
+    <link rel="canonical" href="https://bsfreetools.com/pdf/doc-scanner/">
+    
+    <meta property="og:title" content="Pro Doc Scanner | BS Free Tools">
+    <meta property="og:description" content="Fix skewed photos of documents and turn them into professional PDFs without uploading data.">
+    <meta property="og:url" content="https://bsfreetools.com/pdf/doc-scanner/">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/perspective-transform@1.1.3/dist/perspective-transform.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --accent: #2563eb;
+            --handle-color: #3b82f6;
+        }
+
+        [data-theme="light"] {
+            --bg-base: #E2E2E7; 
+            --card-bg: #FFFFFF; 
+            --card-border: rgba(0, 0, 0, 0.12);
+            --text-main: #1D1D1F;
+            --text-secondary: #424245;
+            --nav-bg: rgba(226, 226, 231, 0.8);
+            --accent: #007AFF;
+            --handle-color: #007AFF;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 900px; margin: 120px auto 40px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 2rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (min-width: 768px) {
+            .tool-container { padding: 3rem; }
+        }
+
+        .drop-zone {
+            display: block; width: 100%;
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin-bottom: 2rem;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone:hover { border-color: var(--text-main); background: rgba(255,255,255,0.03); }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 24px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            cursor: pointer; border: none; outline: none; width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .btn-primary { width: auto; padding: 14px 40px; font-size: 12px; letter-spacing: 0.15em; }
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.05); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-success { background: #10b981; color: #ffffff; }
+        .btn-success:hover:not(:disabled) { background: #059669; }
+
+        .btn-icon {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-main); padding: 10px 20px; border-radius: 8px;
+            font-size: 14px; cursor: pointer; transition: all 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-icon:hover { background: rgba(255,255,255,0.1); }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+
+        #editor-wrapper {
+            position: relative; display: inline-block; overflow: hidden;
+            max-width: 100%; touch-action: none; user-select: none;
+            border: 1px solid var(--card-border); border-radius: 8px;
+            background: #000;
+        }
+
+        .handle {
+            position: absolute; width: 36px; height: 36px;
+            background-color: var(--handle-color); border: 3px solid #FFF;
+            border-radius: 50%; cursor: crosshair; z-index: 50;
+            transform: translate(-50%, -50%); box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            touch-action: none;
+        }
+        
+        .handle::after {
+            content: ''; position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px;
+        }
+
+        /* Custom Range Slider & Checkbox */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px;
+            border-radius: 50%; background: var(--text-main); cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer;
+            background: var(--card-border); border-radius: 2px;
+        }
+
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-6 py-4 md:px-10 md:py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/pdf/" class="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO PDF SUITE
+        </a>
+        <div class="flex items-center gap-6">
+            <button onclick="toggleTheme()" class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] border border-[var(--card-border)] px-4 py-2 rounded-full" id="themeBtn">Light Mode</button>
+        </div>
+    </nav>
+
+    <main class="px-4 flex flex-col min-h-screen">
+        <div class="tool-container flex-grow">
+            <h1 class="text-3xl md:text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+                PRO DOC SCANNER
+            </h1>
+            <p class="mt-4 md:mt-6 text-xs md:text-sm font-medium leading-relaxed max-w-md mx-auto text-[var(--text-secondary)]">
+                Fix skewed photos, remove shadows, and generate perfectly flat PDFs. Processed 100% locally.
+            </p>
+
+            <div id="upload-section" class="mt-8">
+                <label for="file-input" class="drop-zone" id="drop-zone">
+                    <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)] pointer-events-none">
+                        Tap here to take photo or select image
+                    </p>
+                    <input type="file" id="file-input" accept="image/*,capture=camera" class="hidden">
+                </label>
+                <div id="upload-error" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 hidden"></div>
+            </div>
+
+            <div id="editor-section" class="mt-8 hidden flex flex-col items-center">
+                
+                <div class="flex justify-between items-center w-full mb-4">
+                    <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-emerald-500 text-left">Drag the blue dots to the 4 corners</p>
+                    <button id="rotate-btn" class="btn-icon">
+                        <i class="fa-solid fa-rotate-right"></i> Rotate
+                    </button>
+                </div>
+                
+                <div id="editor-wrapper">
+                    <canvas id="editor-canvas" class="block max-w-full h-auto"></canvas>
+                    <div id="p0" class="handle"></div>
+                    <div id="p1" class="handle"></div>
+                    <div id="p2" class="handle"></div>
+                    <div id="p3" class="handle"></div>
+                </div>
+
+                <div class="mt-8 w-full max-w-sm mx-auto">
+                    <button id="scan-btn" class="btn-primary w-full">
+                        Flatten Image
+                    </button>
+                </div>
+                
+                <div id="status" class="mt-4 text-[10px] font-black uppercase tracking-widest text-[var(--text-main)] min-h-[1rem]"></div>
+            </div>
+            
+            <div id="preview-section" class="mt-8 hidden flex flex-col items-center w-full">
+                
+                <canvas id="result-canvas" class="block max-w-full h-auto border border-[var(--card-border)] rounded-lg shadow-lg mx-auto bg-white"></canvas>
+                
+                <div id="adjust-section" class="mt-8 w-full max-w-md mx-auto bg-black/20 p-6 rounded-xl border border-[var(--card-border)] text-left">
+                    
+                    <div class="flex items-center justify-between mb-6 pb-6 border-b border-[var(--card-border)]">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">Remove Shadows</p>
+                            <p class="text-[9px] text-[var(--text-secondary)] mt-1">Neutralizes uneven lighting</p>
+                        </div>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="shadow-toggle" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out z-10"/>
+                            <label for="shadow-toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-500 cursor-pointer"></label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">Ink Darkness</label>
+                        <span id="slider-val" class="text-[10px] font-bold text-[var(--text-secondary)]">Normal</span>
+                    </div>
+                    <input type="range" id="threshold-slider" min="50" max="220" value="130" class="w-full">
+                </div>
+
+                <div class="mt-8 flex flex-col sm:flex-row flex-wrap gap-4 justify-center w-full max-w-md mx-auto">
+                    <button id="reset-btn" class="btn-primary bg-transparent border border-[var(--card-border)]">
+                        Reset Corners
+                    </button>
+                    <button id="download-btn" class="btn-primary btn-success flex-grow">
+                        Download PDF
+                    </button>
+                </div>
+            </div>
+
+            <canvas id="rotation-canvas" class="hidden"></canvas>
+        </div>
+
+        <article class="max-w-3xl mx-auto mt-4 mb-12 p-6 md:p-8 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl text-[var(--text-secondary)]">
+            <h2 class="text-lg md:text-xl font-bold text-[var(--text-main)] mb-4">Fix Skewed Document Photos Instantly</h2>
+            <p class="text-xs md:text-sm leading-relaxed mb-4">
+                Taking a picture of a folded letter, receipt, or ID card often results in a skewed, unreadable image. The <strong>Pro Doc Scanner</strong> solves this by allowing you to map the exact corners of your physical document.
+            </p>
+            <p class="text-xs md:text-sm leading-relaxed mb-4">
+                By dragging the four corner pins, our client-side algorithm executes a true mathematical perspective warp. It calculates the inverse geometry to flatten your image pixel-by-pixel. 
+            </p>
+            <p class="text-xs md:text-sm leading-relaxed">
+                <strong>Shadow Removal Engine:</strong> Most free tools leave ugly dark blobs where your hand or phone blocked the light. Our tool utilizes an advanced <em>Local Illumination Map</em>. It separates the text from the shadows in the background, neutralizing uneven lighting to replicate the quality of a traditional flatbed scanner—all without ever transmitting your sensitive paperwork to a server.
+            </p>
+        </article>
+
+        <div class="ad-container">
+            <span>Advertisement Space (728x90)</span>
+        </div>
+
+        <footer class="mt-auto py-12 text-center border-t border-[var(--card-border)]">
+            <div class="mb-6">
+                <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)] opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                    Support via Ko-fi
+                </a>
+            </div>
+            <p class="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)] mb-2">The No-BS Privacy Commitment</p>
+            <p class="text-xs text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed px-4">
+                We don't have a database. We don't store your files. Everything is processed in your device's RAM. <span class="opacity-50">Reality Check: Google knows you visited this URL because we use their analytics to see which tools people actually use.</span>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const fileLabel = document.getElementById('file-label');
+        const uploadError = document.getElementById('upload-error');
+        
+        const uploadSection = document.getElementById('upload-section');
+        const editorSection = document.getElementById('editor-section');
+        const previewSection = document.getElementById('preview-section');
+        
+        const canvas = document.getElementById('editor-canvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('editor-wrapper');
+        const scanBtn = document.getElementById('scan-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const rotateBtn = document.getElementById('rotate-btn');
+        const status = document.getElementById('status');
+        
+        const resultCanvas = document.getElementById('result-canvas');
+        const thresholdSlider = document.getElementById('threshold-slider');
+        const shadowToggle = document.getElementById('shadow-toggle');
+        const sliderVal = document.getElementById('slider-val');
+
+        const handles = [
+            document.getElementById('p0'), 
+            document.getElementById('p1'), 
+            document.getElementById('p2'), 
+            document.getElementById('p3')  
+        ];
+        
+        let originalImg = new Image();
+        let rotatedCanvas = document.getElementById('rotation-canvas');
+        let rotatedCtx = rotatedCanvas.getContext('2d');
+        let currentRotation = 0;
+        let points = []; 
+
+        let rawWarpedData = null; 
+        let destW = 0;
+        let destH = 0;
+
+        function renderEditorView() {
+            const maxW = Math.min(window.innerWidth - 32, 800); 
+            const maxH = window.innerHeight * 0.6; 
+            
+            let scaleX = maxW / rotatedCanvas.width;
+            let scaleY = maxH / rotatedCanvas.height;
+            let scale = Math.min(scaleX, scaleY);
+            
+            canvas.width = rotatedCanvas.width * scale;
+            canvas.height = rotatedCanvas.height * scale;
+            
+            ctx.drawImage(rotatedCanvas, 0, 0, canvas.width, canvas.height);
+            
+            // THE ROTATION/LOAD FIX: Force pins to a safe, tight center box
+            const padX = canvas.width * 0.25; 
+            const padY = canvas.height * 0.25;
+            
+            points = [
+                {x: padX, y: padY}, 
+                {x: canvas.width - padX, y: padY},
+                {x: canvas.width - padX, y: canvas.height - padY},
+                {x: padX, y: canvas.height - padY}
+            ];
+            
+            updateHandles();
+        }
+
+        function applyRotation() {
+            if(currentRotation % 180 === 90) {
+                rotatedCanvas.width = originalImg.height;
+                rotatedCanvas.height = originalImg.width;
+            } else {
+                rotatedCanvas.width = originalImg.width;
+                rotatedCanvas.height = originalImg.height;
+            }
+            
+            rotatedCtx.clearRect(0, 0, rotatedCanvas.width, rotatedCanvas.height);
+            rotatedCtx.save();
+            rotatedCtx.translate(rotatedCanvas.width / 2, rotatedCanvas.height / 2);
+            rotatedCtx.rotate((currentRotation * Math.PI) / 180);
+            rotatedCtx.drawImage(originalImg, -originalImg.width / 2, -originalImg.height / 2);
+            rotatedCtx.restore();
+            
+            renderEditorView();
+        }
+
+        rotateBtn.addEventListener('click', () => {
+            currentRotation = (currentRotation + 90) % 360;
+            applyRotation();
+        });
+
+        const handleFile = (file) => {
+            if (!file) return;
+            fileLabel.innerText = "LOADING IMAGE...";
+            uploadError.classList.add('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = (f) => {
+                originalImg.onload = () => {
+                    currentRotation = 0;
+                    applyRotation(); 
+                    
+                    uploadSection.classList.add('hidden');
+                    previewSection.classList.add('hidden');
+                    editorSection.classList.remove('hidden');
+                    scanBtn.disabled = false;
+                    status.textContent = '';
+                };
+                originalImg.onerror = () => {
+                    uploadError.innerText = "ERROR: INVALID IMAGE FORMAT.";
+                    uploadError.classList.remove('hidden');
+                    fileLabel.innerText = "Tap here to take photo or select image";
+                };
+                originalImg.src = f.target.result;
+            };
+            reader.onerror = () => {
+                uploadError.innerText = "ERROR: COULD NOT READ FILE.";
+                uploadError.classList.remove('hidden');
+                fileLabel.innerText = "Tap here to take photo or select image";
+            };
+            reader.readAsDataURL(file);
+        };
+
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        dropZone.addEventListener('dragover', (e) => e.preventDefault());
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function updateHandles() {
+            points.forEach((p, i) => {
+                handles[i].style.left = p.x + 'px';
+                handles[i].style.top = p.y + 'px';
+            });
+        }
+
+        let activeHandle = null;
+        const startDrag = (e) => {
+            if(e.target.classList.contains('handle')) {
+                activeHandle = e.target;
+                e.preventDefault();
+            }
+        };
+        const moveDrag = (e) => {
+            if(!activeHandle) return;
+            e.preventDefault();
+            const rect = wrapper.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            let newX = clientX - rect.left;
+            let newY = clientY - rect.top;
+            
+            newX = Math.max(0, Math.min(newX, canvas.width));
+            newY = Math.max(0, Math.min(newY, canvas.height));
+
+            const idx = activeHandle.id.replace('p', '');
+            points[idx].x = newX;
+            points[idx].y = newY;
+            updateHandles();
+        };
+        const endDrag = () => activeHandle = null;
+
+        wrapper.addEventListener('mousedown', startDrag);
+        wrapper.addEventListener('touchstart', startDrag, {passive: false});
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('touchmove', moveDrag, {passive: false});
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+
+        scanBtn.onclick = () => {
+            scanBtn.disabled = true;
+            status.textContent = 'EXTRACTING DOCUMENT...';
+            
+            setTimeout(() => {
+                const rCtx = resultCanvas.getContext('2d');
+                
+                const scaleX = canvas.width / rotatedCanvas.width;
+                const scaleY = canvas.height / rotatedCanvas.height;
+                
+                const pt0 = { x: points[0].x / scaleX, y: points[0].y / scaleY };
+                const pt1 = { x: points[1].x / scaleX, y: points[1].y / scaleY };
+                const pt2 = { x: points[2].x / scaleX, y: points[2].y / scaleY };
+                const pt3 = { x: points[3].x / scaleX, y: points[3].y / scaleY };
+
+                const widthTop = Math.hypot(pt1.x - pt0.x, pt1.y - pt0.y);
+                const widthBottom = Math.hypot(pt2.x - pt3.x, pt2.y - pt3.y);
+                const docW = Math.max(widthTop, widthBottom);
+
+                const heightLeft = Math.hypot(pt3.x - pt0.x, pt3.y - pt0.y);
+                const heightRight = Math.hypot(pt2.x - pt1.x, pt2.y - pt1.y);
+                const docH = Math.max(heightLeft, heightRight);
+
+                const maxDim = 1800; 
+                if (docW > docH) {
+                    destW = maxDim;
+                    destH = Math.round(maxDim * (docH / docW));
+                } else {
+                    destH = maxDim;
+                    destW = Math.round(maxDim * (docW / docH));
+                }
+
+                resultCanvas.width = destW;
+                resultCanvas.height = destH;
+
+                const srcPts = [pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y, pt3.x, pt3.y];
+                const dstPts = [0, 0, destW, 0, destW, destH, 0, destH];
+                
+                let invPerspT;
+                try {
+                    invPerspT = PerspT(dstPts, srcPts);
+                } catch(err) {
+                    status.textContent = "ERROR: SHAPE CROSSED OVER ITSELF.";
+                    scanBtn.disabled = false;
+                    return;
+                }
+
+                const srcImgData = rotatedCtx.getImageData(0, 0, rotatedCanvas.width, rotatedCanvas.height);
+                const srcData = srcImgData.data;
+                const srcW = rotatedCanvas.width;
+                const srcH = rotatedCanvas.height;
+                
+                rawWarpedData = rCtx.createImageData(destW, destH);
+                const rawData = rawWarpedData.data;
+
+                for (let y = 0; y < destH; y++) {
+                    for (let x = 0; x < destW; x++) {
+                        const srcPt = invPerspT.transform(x, y);
+                        const sx = Math.floor(srcPt[0]);
+                        const sy = Math.floor(srcPt[1]);
+
+                        const destIdx = (y * destW + x) * 4;
+
+                        if (sx >= 0 && sx < srcW && sy >= 0 && sy < srcH) {
+                            const srcIdx = (sy * srcW + sx) * 4;
+                            rawData[destIdx] = srcData[srcIdx];       
+                            rawData[destIdx+1] = srcData[srcIdx + 1]; 
+                            rawData[destIdx+2] = srcData[srcIdx + 2]; 
+                            rawData[destIdx+3] = 255;                 
+                        } else {
+                            rawData[destIdx] = 255;
+                            rawData[destIdx+1] = 255;
+                            rawData[destIdx+2] = 255;
+                            rawData[destIdx+3] = 255;
+                        }
+                    }
+                }
+                
+                editorSection.classList.add('hidden');
+                previewSection.classList.remove('hidden');
+                
+                // Trigger initial filter application
+                applyFilter();
+                
+            }, 50); 
+        };
+
+        function applyFilter() {
+            if (!rawWarpedData) return;
+            
+            const useShadowFix = shadowToggle.checked;
+            const threshold = parseInt(thresholdSlider.value);
+            
+            // UI Label update
+            if(threshold < 90) sliderVal.innerText = "Light";
+            else if (threshold > 150) sliderVal.innerText = "Dark";
+            else sliderVal.innerText = "Normal";
+
+            const rCtx = resultCanvas.getContext('2d');
+            const filteredData = rCtx.createImageData(destW, destH);
+            const rData = rawWarpedData.data;
+            const fData = filteredData.data;
+
+            let illumData = null;
+
+            // SHADOW REMOVAL LOGIC
+            // We create a fast, blurred "Illumination Map" by scaling down and up
+            if (useShadowFix) {
+                const tmpCanvas = document.createElement('canvas');
+                tmpCanvas.width = destW; 
+                tmpCanvas.height = destH;
+                const tCtx = tmpCanvas.getContext('2d');
+                tCtx.putImageData(rawWarpedData, 0, 0);
+
+                const smallCanvas = document.createElement('canvas');
+                // Scale down heavily to average out the colors (creates blur)
+                smallCanvas.width = Math.max(1, Math.floor(destW / 30)); 
+                smallCanvas.height = Math.max(1, Math.floor(destH / 30));
+                const sCtx = smallCanvas.getContext('2d');
+                sCtx.drawImage(tmpCanvas, 0, 0, smallCanvas.width, smallCanvas.height);
+
+                // Scale back up to create the smooth shadow map
+                tCtx.clearRect(0, 0, destW, destH);
+                tCtx.drawImage(smallCanvas, 0, 0, destW, destH);
+                illumData = tCtx.getImageData(0, 0, destW, destH).data;
+            }
+
+            // Apply filter pixel by pixel
+            for (let i = 0; i < rData.length; i += 4) {
+                let r = rData[i];
+                let g = rData[i+1];
+                let b = rData[i+2];
+
+                // If removing shadows, divide the actual pixel color by the shadow map color
+                if (useShadowFix && illumData) {
+                    const ir = illumData[i] || 1;
+                    const ig = illumData[i+1] || 1;
+                    const ib = illumData[i+2] || 1;
+                    
+                    // Division perfectly flattens uneven lighting
+                    r = Math.min(255, (r / ir) * 255);
+                    g = Math.min(255, (g / ig) * 255);
+                    b = Math.min(255, (b / ib) * 255);
+                }
+
+                // Grayscale conversion
+                const avg = (r + g + b) / 3;
+                
+                // Contrast Threshold
+                const val = avg > threshold ? Math.min(avg + 50, 255) : Math.max(avg - 30, 0); 
+                
+                fData[i] = val;     
+                fData[i+1] = val;   
+                fData[i+2] = val;   
+                fData[i+3] = 255;   
+            }
+            
+            rCtx.putImageData(filteredData, 0, 0);
+        }
+
+        // Live update listeners
+        thresholdSlider.addEventListener('input', applyFilter);
+        shadowToggle.addEventListener('change', applyFilter);
+
+        resetBtn.onclick = () => {
+            previewSection.classList.add('hidden');
+            editorSection.classList.remove('hidden');
+            scanBtn.disabled = false;
+            status.textContent = '';
+        };
+
+        downloadBtn.onclick = () => {
+            const { jsPDF } = window.jspdf;
+            const isLandscape = resultCanvas.width > resultCanvas.height;
+            
+            const pdf = new jsPDF({ 
+                orientation: isLandscape ? 'l' : 'p', 
+                unit: 'px', 
+                format: [resultCanvas.width, resultCanvas.height] 
+            });
+            
+            const imgData = resultCanvas.toDataURL('image/jpeg', 0.8);
+            pdf.addImage(imgData, 'JPEG', 0, 0, resultCanvas.width, resultCanvas.height, undefined, 'FAST');
+            pdf.save("bsfree_scanned_document.pdf");
+        };
+
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                btn.innerText = 'Light Mode';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = 'Dark Mode';
+            }
+        }
+    </script>
+</body>
+</html>

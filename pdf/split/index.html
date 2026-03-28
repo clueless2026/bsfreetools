@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split PDF | Visual Page Extractor | BSFreeTools</title>
+    
+    <meta name="description" content="Visual PDF splitting. Preview pages and click to extract or delete. 100% private, browser-side processing.">
+    <link rel="canonical" href="https://bsfreetools.com/pdf/split/">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --accent: #2563eb;
+        }
+
+        [data-theme="light"] {
+            --bg-base: #E2E2E7; 
+            --card-bg: #FFFFFF; 
+            --card-border: rgba(0, 0, 0, 0.12);
+            --text-main: #1D1D1F;
+            --text-secondary: #424245;
+            --nav-bg: rgba(226, 226, 231, 0.8);
+            --accent: #007AFF;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 1100px; margin: 120px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 2rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 30px; margin-bottom: 2rem;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .page-card {
+            aspect-ratio: 1 / 1.4;
+            background: white;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 4px solid transparent;
+            overflow: hidden;
+        }
+
+        .page-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            transform: scale(1.03);
+        }
+
+        .page-number {
+            position: absolute; bottom: 8px; right: 8px;
+            background: var(--accent); color: white;
+            font-size: 10px; font-weight: 900;
+            padding: 2px 6px; border-radius: 4px;
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+        }
+
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/pdf/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60">← BACK</a>
+        <button onclick="toggleTheme()" class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] border border-[var(--card-border)] px-4 py-2 rounded-full">Mode</button>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-3xl font-black italic uppercase text-[var(--text-main)] tracking-tight">Visual Splitter</h1>
+        <p class="mt-2 text-xs opacity-60">Click pages to select/deselect for extraction.</p>
+
+        <div class="drop-zone mt-6" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em]">Drop PDF or Click to Load</p>
+            <input type="file" id="file-input" accept=".pdf" class="hidden" onchange="handleFileSelect(event)">
+        </div>
+
+        <div id="visual-engine" class="hidden">
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <input type="text" id="manual-range" placeholder="Manual range (e.g. 1-3)" class="bg-white/5 border border-white/10 text-white rounded-lg px-4 py-2 text-xs w-48 text-center">
+                <button onclick="selectAll()" class="text-[10px] font-bold uppercase border border-white/10 px-4 py-2 rounded-lg">Select All</button>
+                <button onclick="clearSelection()" class="text-[10px] font-bold uppercase border border-white/10 px-4 py-2 rounded-lg text-rose-500">Clear</button>
+            </div>
+
+            <div id="preview-grid" class="preview-grid">
+                </div>
+
+            <div class="mt-8 flex flex-col items-center gap-4">
+                <button id="split-btn" onclick="processSplit()" class="btn-primary" disabled>Extract Selected Pages</button>
+                <div id="status" class="text-[10px] font-black uppercase tracking-widest text-emerald-500"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ad-container"><span>Advertisement Space</span></div>
+
+    <footer class="mt-auto py-12 text-center">
+        <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">Support via Ko-fi</a>
+        <p class="mt-6 text-[10px] font-black uppercase tracking-[1em] opacity-20">BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const { PDFDocument } = PDFLib;
+        let selectedFile = null;
+        let selectedPages = new Set();
+        let totalPages = 0;
+
+        // Drag and Drop Logic
+        const dropZone = document.getElementById('drop-zone');
+        window.addEventListener('dragover', e => e.preventDefault());
+        window.addEventListener('drop', e => {
+            e.preventDefault();
+            const file = Array.from(e.dataTransfer.files).find(f => f.type === 'application/pdf');
+            if(file) loadFile(file);
+        });
+
+        function handleFileSelect(e) {
+            if(e.target.files[0]) loadFile(e.target.files[0]);
+        }
+
+        async function loadFile(file) {
+            selectedFile = file;
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+            totalPages = pdf.numPages;
+            
+            document.getElementById('visual-engine').classList.remove('hidden');
+            document.getElementById('file-label').textContent = file.name;
+            renderThumbnails(pdf);
+        }
+
+        async function renderThumbnails(pdf) {
+            const grid = document.getElementById('preview-grid');
+            grid.innerHTML = '';
+            selectedPages.clear();
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 0.3 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                const card = document.createElement('div');
+                card.className = "page-card";
+                card.id = `page-${i}`;
+                card.innerHTML = `<img src="${canvas.toDataURL()}" class="w-full h-full object-cover"><span class="page-number">${i}</span>`;
+                card.onclick = () => togglePage(i);
+                grid.appendChild(card);
+            }
+            updateUI();
+        }
+
+        function togglePage(pageNum) {
+            if (selectedPages.has(pageNum)) selectedPages.delete(pageNum);
+            else selectedPages.add(pageNum);
+            
+            document.getElementById(`page-${pageNum}`).classList.toggle('selected');
+            updateUI();
+        }
+
+        function selectAll() {
+            for (let i = 1; i <= totalPages; i++) {
+                selectedPages.add(i);
+                document.getElementById(`page-${i}`).classList.add('selected');
+            }
+            updateUI();
+        }
+
+        function clearSelection() {
+            selectedPages.clear();
+            document.querySelectorAll('.page-card').forEach(c => c.classList.remove('selected'));
+            updateUI();
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('split-btn');
+            btn.disabled = selectedPages.size === 0;
+            btn.textContent = `Extract ${selectedPages.size} Page${selectedPages.size !== 1 ? 's' : ''}`;
+        }
+
+        async function processSplit() {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('split-btn');
+            try {
+                btn.disabled = true;
+                status.textContent = 'Processing locally...';
+                
+                const bytes = await selectedFile.arrayBuffer();
+                const srcDoc = await PDFDocument.load(bytes);
+                const newDoc = await PDFDocument.create();
+                
+                // Sort pages to maintain original sequence
+                const indices = Array.from(selectedPages).sort((a, b) => a - b).map(p => p - 1);
+                const copiedPages = await newDoc.copyPages(srcDoc, indices);
+                copiedPages.forEach(p => newDoc.addPage(p));
+
+                const pdfBytes = await newDoc.save();
+                download(pdfBytes, `split_${selectedFile.name}`, "application/pdf");
+                status.textContent = 'SUCCESS: DOWNLOAD STARTED';
+            } catch (e) {
+                status.textContent = 'ERROR PROCESSING PDF';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function toggleTheme() {
+            document.body.toggleAttribute('data-theme');
+        }
+    </script>
+</body>
+</html>

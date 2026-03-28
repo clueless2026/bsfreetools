@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Image | High-Quality Browser Conversion | BSFreeTools</title>
+    
+    <meta name="description" content="Convert PDF pages to high-quality JPG or PNG images instantly. 100% private, browser-side conversion. No file uploads and no sign-in required.">
+    <link rel="canonical" href="https://bsfreetools.com/pdf/pdftoimage/">
+    <meta property="og:title" content="PDF to Image Converter - BSFreeTools">
+    <meta property="og:description" content="Turn PDF documents into images locally in your browser for maximum privacy.">
+    <meta property="og:url" content="https://bsfreetools.com/pdf/pdftoimage/">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+        }
+
+        [data-theme="light"] {
+            --bg-base: #E2E2E7; 
+            --card-bg: #FFFFFF; 
+            --card-border: rgba(0, 0, 0, 0.12);
+            --text-main: #1D1D1F;
+            --text-secondary: #424245;
+            --nav-bg: rgba(226, 226, 231, 0.8);
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 900px; margin: 160px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .upload-area.drag-over {
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+        }
+
+        select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.05); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .preview-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--card-border);
+            padding: 15px; border-radius: 12px;
+            transition: transform 0.2s;
+        }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/pdf/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO PDF SUITE
+        </a>
+        <button onclick="toggleTheme()" class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] border border-[var(--card-border)] px-4 py-2 rounded-full" id="themeBtn">Light Mode</button>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            PDF TO IMAGE
+        </h1>
+        <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Convert PDF pages to images. All processing happens in your browser cache—no files ever leave your device.
+        </p>
+
+        <div class="upload-area" id="drop-zone" onclick="document.getElementById('fileInput').click()">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop PDF here or click to select
+            </p>
+            <input type="file" id="fileInput" accept="application/pdf" hidden>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-8 text-left">
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-widest opacity-40 block mb-2">Format</label>
+                <select id="formatSelect" class="w-full">
+                    <option value="image/jpeg">JPEG (.jpg)</option>
+                    <option value="image/png">PNG (.png)</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-widest opacity-40 block mb-2">Quality</label>
+                <select id="qualitySelect" class="w-full">
+                    <option value="1">Standard (72 DPI)</option>
+                    <option value="2" selected>High (150 DPI)</option>
+                    <option value="3">Ultra (300 DPI)</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="convertBtn" class="btn-primary" disabled>Convert PDF Pages</button>
+        <div id="status" class="mt-4 text-[10px] font-black uppercase tracking-widest text-emerald-500 min-h-[1rem]"></div>
+
+        <div id="preview-container" class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+    </div>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-10 pb-20 leading-relaxed text-sm opacity-60">
+        <h2 class="text-[var(--text-main)] font-black uppercase tracking-widest text-lg mb-4">How to convert PDF to Image without uploading files</h2>
+        <p>
+            Most online converters require you to upload your sensitive PDF documents to their servers. Our Free PDF to Image tool works differently. Using advanced JavaScript libraries, the conversion happens entirely within your own web browser. Your data never leaves your computer.
+        </p>
+    </div>
+
+    <footer class="py-12 text-center border-t border-white/5">
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM • 2026</p>
+    </footer>
+
+    <script>
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('drop-zone');
+        const convertBtn = document.getElementById('convertBtn');
+        const previewContainer = document.getElementById('preview-container');
+        const status = document.getElementById('status');
+
+        let pdfDoc = null;
+
+        // Global Drag and Drop Handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            window.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        dropZone.addEventListener('dragover', () => dropZone.classList.add('drag-over'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        
+        dropZone.addEventListener('drop', (e) => {
+            dropZone.classList.remove('drag-over');
+            const file = Array.from(e.dataTransfer.files).find(f => f.type === 'application/pdf');
+            if (file) loadPDF(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) loadPDF(e.target.files[0]);
+        });
+
+        async function loadPDF(file) {
+            document.getElementById('file-label').textContent = file.name.toUpperCase();
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+                convertBtn.disabled = false;
+                status.textContent = `${pdfDoc.numPages} PAGES STAGED`;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        convertBtn.addEventListener('click', async () => {
+            previewContainer.innerHTML = '';
+            status.textContent = "PROCESSING...";
+            const format = document.getElementById('formatSelect').value;
+            const scale = parseFloat(document.getElementById('qualitySelect').value);
+
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const viewport = page.getViewport({ scale: scale });
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                const imgUrl = canvas.toDataURL(format);
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                
+                const img = new Image();
+                img.src = imgUrl;
+                img.className = 'rounded-md mb-3 w-full h-auto';
+                
+                const link = document.createElement('a');
+                link.href = imgUrl;
+                link.download = `page-${i}.${format.split('/')[1]}`;
+                link.textContent = `DOWNLOAD PG ${i}`;
+                link.className = 'text-[10px] font-black text-emerald-500 uppercase tracking-widest hover:opacity-70';
+
+                div.appendChild(img);
+                div.appendChild(link);
+                previewContainer.appendChild(div);
+            }
+            status.textContent = "CONVERSION COMPLETE";
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                btn.innerText = 'Light Mode';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = 'Dark Mode';
+            }
+        }
+    </script>
+</body>
+</html>

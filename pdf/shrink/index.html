@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure PDF Shrink | Compress PDF Locally | BSFreeTools</title>
+    
+    <meta name="description" content="Reduce PDF file sizes directly in your browser. 100% private, no server uploads, no data tracking. Fast, secure, and free.">
+    <link rel="canonical" href="https://bsfreetools.com/pdf/shrink/">
+    
+    <meta property="og:title" content="Secure PDF Shrink | BS Free Tools">
+    <meta property="og:description" content="Compress PDF files locally without uploading them to a server. Total privacy.">
+    <meta property="og:url" content="https://bsfreetools.com/pdf/shrink/">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --accent: #2563eb;
+        }
+
+        [data-theme="light"] {
+            --bg-base: #E2E2E7; 
+            --card-bg: #FFFFFF; 
+            --card-border: rgba(0, 0, 0, 0.12);
+            --text-main: #1D1D1F;
+            --text-secondary: #424245;
+            --nav-bg: rgba(226, 226, 231, 0.8);
+            --accent: #007AFF;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 120px auto 40px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin-bottom: 2rem;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone:hover { border-color: var(--text-main); background: rgba(255,255,255,0.03); }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.05); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px;
+            border-radius: 50%; background: var(--text-main); cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer;
+            background: var(--card-border); border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/pdf/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO PDF SUITE
+        </a>
+        <div class="flex items-center gap-6">
+            <button onclick="toggleTheme()" class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-main)] border border-[var(--card-border)] px-4 py-2 rounded-full" id="themeBtn">Light Mode</button>
+        </div>
+    </nav>
+
+    <main class="px-4">
+        <div class="tool-container">
+            <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+                SECURE PDF SHRINK
+            </h1>
+            <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto text-[var(--text-secondary)]">
+                Drastically reduce file size by compressing your PDF into a flattened document. Processed 100% locally.
+            </p>
+
+            <div class="mt-8 text-left bg-black/20 p-6 rounded-xl border border-[var(--card-border)]">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-[var(--text-main)] mb-4">Compression Level</label>
+                <div class="flex justify-between text-xs font-bold mb-2 text-[var(--text-secondary)]">
+                    <span>Smaller File (Lower Quality)</span>
+                    <span>Better Quality (Larger File)</span>
+                </div>
+                <input type="range" id="quality-slider" min="0.3" max="0.9" step="0.1" value="0.6" class="w-full">
+            </div>
+
+            <div class="drop-zone mt-8" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                    Drop PDF here or click to select
+                </p>
+                <input type="file" id="file-input" accept="application/pdf" class="hidden">
+            </div>
+
+            <div class="mt-8 flex flex-col items-center gap-4">
+                <button id="shrink-btn" class="btn-primary" disabled>
+                    Shrink Document
+                </button>
+                <div id="status" class="text-[10px] font-black uppercase tracking-widest text-emerald-500 min-h-[1rem]"></div>
+                
+                <div id="results" class="hidden mt-4">
+                    <p class="text-sm font-bold text-[var(--text-main)] mb-4" id="stat-text"></p>
+                    <a id="download-link" class="btn-primary inline-block bg-emerald-600 text-white">Download</a>
+                </div>
+            </div>
+        </div>
+
+        <article class="max-w-3xl mx-auto mt-12 mb-12 p-8 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl text-[var(--text-secondary)]">
+            <h2 class="text-xl font-bold text-[var(--text-main)] mb-4">How Our Browser-Based PDF Compressor Works</h2>
+            <p class="text-sm leading-relaxed mb-4">
+                Most free online PDF shrinkers force you to upload your sensitive tax documents, contracts, or IDs to a remote server. This is a massive privacy risk. Our <strong>Secure PDF Shrink</strong> tool works entirely within your web browser. 
+            </p>
+            <p class="text-sm leading-relaxed">
+                We use advanced client-side scripts to rasterize your document and compress the internal images without ever transmitting your data across the internet. <em>Note: This process "flattens" your PDF, making text unsearchable, but it guarantees a drastically smaller file size perfect for strict email attachment limits.</em>
+            </p>
+        </article>
+
+        <div class="ad-container">
+            <span>Advertisement Space (728x90)</span>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)] opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] text-[var(--text-secondary)] opacity-40">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        // Setup PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const { jsPDF } = window.jspdf;
+
+        const fileInput = document.getElementById('file-input');
+        const fileLabel = document.getElementById('file-label');
+        const shrinkBtn = document.getElementById('shrink-btn');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const statText = document.getElementById('stat-text');
+        const qualitySlider = document.getElementById('quality-slider');
+        const downloadLink = document.getElementById('download-link');
+
+        let selectedFile = null;
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                fileLabel.textContent = selectedFile.name;
+                shrinkBtn.disabled = false;
+                results.classList.add('hidden');
+                status.textContent = '';
+            }
+        });
+
+        // Drag and drop handling
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => e.preventDefault());
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length > 0 && e.dataTransfer.files[0].type === 'application/pdf') {
+                selectedFile = e.dataTransfer.files[0];
+                fileInput.files = e.dataTransfer.files;
+                fileLabel.textContent = selectedFile.name;
+                shrinkBtn.disabled = false;
+                results.classList.add('hidden');
+                status.textContent = '';
+            }
+        });
+
+        shrinkBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            shrinkBtn.disabled = true;
+            status.textContent = 'READING FILE...';
+            status.style.color = '#10b981'; // emerald
+            results.classList.add('hidden');
+
+            const originalSize = (selectedFile.size / 1024 / 1024).toFixed(2);
+            const quality = parseFloat(qualitySlider.value);
+            // Lower quality means we can afford to scale down slightly for better compression
+            const scale = quality < 0.5 ? 1.5 : 2.0; 
+
+            try {
+                const arrayBuffer = await selectedFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                
+                // Create new jsPDF instance
+                const newPdf = new jsPDF('p', 'pt', 'a4');
+                
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    status.textContent = `COMPRESSING PAGE ${pageNum} OF ${pdf.numPages}...`;
+                    
+                    const page = await pdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: scale });
+                    
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    
+                    // Render page to canvas
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    
+                    // Compress to JPEG
+                    const imgData = canvas.toDataURL('image/jpeg', quality);
+                    
+                    // Calculate dimensions to fit A4
+                    const pdfWidth = newPdf.internal.pageSize.getWidth();
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    
+                    if (pageNum > 1) newPdf.addPage();
+                    newPdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+                }
+
+                status.textContent = 'FINALIZING...';
+                
+                const pdfBlob = newPdf.output('blob');
+                const newSize = (pdfBlob.size / 1024 / 1024).toFixed(2);
+                
+                const url = URL.createObjectURL(pdfBlob);
+                downloadLink.href = url;
+                downloadLink.download = selectedFile.name.replace('.pdf', '_shrunk.pdf');
+                
+                statText.textContent = `Original: ${originalSize} MB | Shrunk: ${newSize} MB`;
+                status.textContent = 'DONE';
+                results.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                status.textContent = 'ERROR: COULD NOT PROCESS FILE';
+                status.style.color = '#ef4444'; // red
+            } finally {
+                shrinkBtn.disabled = false;
+            }
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                btn.innerText = 'Light Mode';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = 'Dark Mode';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Watermark | Add Text Stamps Locally | BSFreeTools</title>
+    
+    <meta name="description" content="Securely add custom text watermarks, confidential stamps, and outlined text to your PDFs locally. 100% private, no file uploads.">
+    <link rel="canonical" href="https://bsfreetools.com/pdf/watermark/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 900px; margin: 120px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 30px; margin-bottom: 2rem;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone:hover { border-color: var(--text-main); background: rgba(255,255,255,0.03); }
+        .drag-active { border-color: var(--text-main); background: rgba(255,255,255,0.05); transform: scale(1.02); }
+
+        .control-group { text-align: left; margin-bottom: 1.5rem; }
+
+        label {
+            display: block; font-size: 10px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            opacity: 0.5; margin-bottom: 0.5rem;
+        }
+
+        input[type="text"], select, input[type="range"] {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border); color: var(--text-main);
+            padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600;
+        }
+        
+        select option {
+            background-color: #111111; 
+            color: #FFFFFF;
+        }
+
+        .btn-action {
+            padding: 14px 40px; background: var(--text-main); color: var(--bg-base);
+            border-radius: 99px; font-size: 11px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.15em;
+            transition: transform 0.2s; width: 100%; margin-top: 1rem;
+        }
+        
+        .btn-action:hover:not(:disabled) { transform: scale(1.02); }
+        .btn-action:disabled { opacity: 0.3; cursor: wait; }
+
+        .ad-container {
+            width: 100%; max-width: 800px; height: 90px;
+            margin: 40px auto; border: 1px dashed var(--card-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; opacity: 0.3; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="p-6 flex justify-between items-center border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0 z-50">
+        <a href="/pdf/" class="text-[10px] font-black tracking-widest opacity-50 hover:opacity-100 uppercase transition-opacity">← BACK</a>
+        <button onclick="window.location.reload()" class="text-[10px] font-black uppercase tracking-widest text-rose-500 hover:underline">Clear</button>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase tracking-tighter mb-4">PDF SHIELD</h1>
+        <p class="text-xs font-medium opacity-60 mb-8 max-w-md mx-auto leading-relaxed">Add highly-customizable watermarks and stamps directly in your browser cache.</p>
+
+        <div id="drop-zone" class="drop-zone" onclick="document.getElementById('pdfInput').click()">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">DROP PDF OR CLICK TO LOAD</p>
+            <input type="file" id="pdfInput" accept=".pdf" class="hidden">
+        </div>
+
+        <div id="controls">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="control-group">
+                    <label>Watermark Text</label>
+                    <input type="text" id="wmText" placeholder="e.g. CONFIDENTIAL" value="INTERNAL USE ONLY">
+                </div>
+                <div class="control-group">
+                    <label>Page Target</label>
+                    <select id="wmPages">
+                        <option value="all">All Pages</option>
+                        <option value="first">First Page Only</option>
+                        <option value="last">Last Page Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="control-group">
+                    <label>Layout Pattern</label>
+                    <select id="wmLayout">
+                        <option value="center-diag">Single Huge (Diagonal)</option>
+                        <option value="center-horiz">Single Huge (Horizontal)</option>
+                        <option value="tiled-diag">Tiled (Diagonal)</option>
+                        <option value="tiled-horiz">Tiled (Horizontal)</option>
+                        <option value="footer">Footer Stamp</option>
+                        <option value="header">Header Stamp</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Color Profile</label>
+                    <select id="wmColor">
+                        <option value="outline">White w/ Black Outline</option>
+                        <option value="gray-outline">White w/ Gray Outline</option>
+                        <option value="white">Pure White</option>
+                        <option value="gray">Subtle Gray</option>
+                        <option value="black">Standard Black</option>
+                        <option value="red">Security Red</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Font</label>
+                    <select id="wmBold">
+                        <option value="1">Bold</option>
+                        <option value="0">Normal</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Density (Tiled Only)</label>
+                    <select id="wmDensity">
+                        <option value="8">Sparse</option>
+                        <option value="5" selected>Normal</option>
+                        <option value="3">Dense</option>
+                    </select>
+                </div>
+                <div class="control-group md:col-span-4">
+                    <label>Opacity (<span id="op-val">0.3</span>)</label>
+                    <input type="range" id="wmOpacity" min="0.1" max="1.0" step="0.1" value="0.3" oninput="document.getElementById('op-val').innerText=this.value">
+                </div>
+            </div>
+
+            <button class="btn-action" id="processBtn">Apply Watermark & Download</button>
+            <div id="status" class="mt-4 text-[10px] font-black uppercase tracking-widest text-emerald-400 min-h-[1.5rem]"></div>
+        </div>
+    </div>
+
+    <div class="ad-container">Advertisement Space</div>
+
+    <div class="max-w-3xl mx-auto px-10 pb-20 leading-relaxed text-sm opacity-60">
+        <h2 class="font-black uppercase tracking-widest text-lg mb-4 text-center">Local PDF Watermarking</h2>
+        <p>
+            Protecting your intellectual property shouldn't require exposing it to third-party servers. The <strong>PDF Shield</strong> utility allows you to embed secure, customizable text watermarks directly into your documents. Whether applying a massive "VOID" stamp across the center, subtle footers, or a tiled overlay, the engine processes the entire file within your browser's local memory. Your sensitive files are never uploaded, ensuring absolute privacy.
+        </p>
+    </div>
+
+    <footer class="py-12 text-center opacity-20 border-t border-white/5">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest border border-white/10 px-6 py-2 rounded-full hover:bg-white hover:text-black transition-all">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em]">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
+        let originalBytes = null;
+        const dropZone = document.getElementById('drop-zone');
+
+        window.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-active'); });
+        window.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('drag-active'); });
+        window.addEventListener('drop', async e => {
+            e.preventDefault(); dropZone.classList.remove('drag-active');
+            const file = Array.from(e.dataTransfer.files).find(f => f.type === 'application/pdf');
+            if (file) handleFileSelect(file);
+        });
+
+        document.getElementById('pdfInput').addEventListener('change', async (e) => {
+            if (e.target.files[0]) handleFileSelect(e.target.files[0]);
+        });
+
+        async function handleFileSelect(file) {
+            originalBytes = await file.arrayBuffer();
+            document.getElementById('file-label').textContent = `LOADED: ${file.name.toUpperCase()}`;
+            document.getElementById('file-label').classList.add('text-emerald-400', 'opacity-100');
+        }
+
+        function drawTextWithOutline(page, text, x, y, size, font, rotation, opacity, colorVal) {
+            if (colorVal === 'outline' || colorVal === 'gray-outline') {
+                const strokeColor = colorVal === 'outline' ? rgb(0, 0, 0) : rgb(0.3, 0.3, 0.3);
+                const fillColor = rgb(1, 1, 1); 
+                const offset = size * 0.015; 
+                
+                // MATH VERIFIED FIX: drastically reduce stroke opacity to prevent center compounding
+                const strokeOpacity = opacity * 0.15; 
+
+                const points = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+                for(let [ox, oy] of points) {
+                    page.drawText(text, {
+                        x: x + (ox * offset), y: y + (oy * offset),
+                        size, font, color: strokeColor, rotate: rotation, opacity: strokeOpacity
+                    });
+                }
+                
+                // Boost the white fill slightly so it commands the visual hierarchy over the shadow
+                const fillOpacity = Math.min(1.0, opacity + 0.15);
+                page.drawText(text, { x, y, size, font, color: fillColor, rotate: rotation, opacity: fillOpacity });
+                
+            } else {
+                let color = rgb(0.1, 0.1, 0.1); 
+                if (colorVal === 'red') color = rgb(0.8, 0.1, 0.1);
+                if (colorVal === 'gray') color = rgb(0.6, 0.6, 0.6);
+                if (colorVal === 'white') color = rgb(1, 1, 1);
+                page.drawText(text, { x, y, size, font, color, rotate: rotation, opacity });
+            }
+        }
+
+        document.getElementById('processBtn').addEventListener('click', async () => {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('processBtn');
+            
+            if (!originalBytes) {
+                status.style.color = '#ef4444';
+                status.innerText = "PLEASE DROP A PDF FILE FIRST";
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                status.style.color = '#34d399';
+                status.innerText = "PROCESSING LOCALLY...";
+                await new Promise(r => setTimeout(r, 50));
+                
+                const pdfDoc = await PDFDocument.load(originalBytes.slice(0));
+                
+                const isBold = document.getElementById('wmBold').value === "1";
+                const font = await pdfDoc.embedFont(isBold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica);
+                
+                const text = document.getElementById('wmText').value;
+                if (!text) throw new Error("Text required");
+
+                const opacity = parseFloat(document.getElementById('wmOpacity').value);
+                const layout = document.getElementById('wmLayout').value;
+                const density = parseInt(document.getElementById('wmDensity').value);
+                const colorVal = document.getElementById('wmColor').value;
+                const pagesOption = document.getElementById('wmPages').value;
+
+                const pages = pdfDoc.getPages();
+                const baseTextWidth = font.widthOfTextAtSize(text, 1);
+                
+                pages.forEach((page, index) => {
+                    if (pagesOption === 'first' && index !== 0) return;
+                    if (pagesOption === 'last' && index !== pages.length - 1) return;
+
+                    const { width, height } = page.getSize();
+                    let size, rotAngle, x, y;
+
+                    if (layout.startsWith('center')) {
+                        let targetSize = width * 0.15;
+                        if ((targetSize * baseTextWidth) > (width * 0.9)) {
+                            targetSize = (width * 0.9) / baseTextWidth;
+                        }
+                        size = targetSize;
+                        
+                        rotAngle = layout.includes('diag') ? degrees(45) : degrees(0);
+                        const actualWidth = baseTextWidth * size;
+                        const rad = layout.includes('diag') ? Math.PI / 4 : 0;
+                        
+                        const xOffset = (actualWidth / 2) * Math.cos(rad) - (size / 2) * Math.sin(rad);
+                        const yOffset = (actualWidth / 2) * Math.sin(rad) + (size / 2) * Math.cos(rad);
+                        
+                        x = (width / 2) - xOffset;
+                        y = (height / 2) - yOffset;
+                        
+                        drawTextWithOutline(page, text, x, y, size, font, rotAngle, opacity, colorVal);
+                        
+                    } else if (layout === 'header' || layout === 'footer') {
+                        size = width * 0.04; 
+                        rotAngle = degrees(0);
+                        const actualWidth = baseTextWidth * size;
+                        
+                        x = (width / 2) - (actualWidth / 2);
+                        y = layout === 'header' ? height - 50 - size : 50;
+                        
+                        drawTextWithOutline(page, text, x, y, size, font, rotAngle, opacity, colorVal);
+                        
+                    } else {
+                        size = width * 0.08;
+                        rotAngle = layout.includes('diag') ? degrees(45) : degrees(0);
+                        const stepX = size * density;
+                        const stepY = size * (density * 0.75);
+                        
+                        for (let i = -width; i < width * 2; i += stepX) {
+                            for (let j = -height; j < height * 2; j += stepY) {
+                                drawTextWithOutline(page, text, i, j, size * 0.6, font, rotAngle, opacity, colorVal);
+                            }
+                        }
+                    }
+                });
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: "application/pdf" });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `watermarked_bsfree.pdf`;
+                link.click();
+                
+                status.innerText = "SUCCESS: DOWNLOAD STARTED";
+            } catch (err) {
+                console.error(err);
+                status.style.color = '#ef4444';
+                status.innerText = "ERROR: " + err.message;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
