@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Suite | Local Browser Utilities | BSFreeTools</title>
+    
+    <meta name="description" content="Browser-based image utilities. Compress, convert, resize, bulk edit, and generate PWA icons locally. No file uploads required.">
+    <link rel="canonical" href="https://bsfreetools.com/image/">
+    
+    <meta property="og:title" content="Image Suite - BSFreeTools" />
+    <meta property="og:description" content="Modify and optimize your images locally in your browser. Zero tracking, zero uploads." />
+    <meta property="og:url" content="https://bsfreetools.com/image/" />
+    <meta property="og:type" content="website" />
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Image Suite - BSFreeTools">
+    <meta name="twitter:description" content="Browser-based image utilities for local processing.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+        }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--card-border); 
+            border-radius: 16px; 
+            padding: 2.5rem; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-height: 200px;
+            text-decoration: none;
+        }
+
+        .tool-card:hover { 
+            border-color: rgba(255,255,255,0.4); 
+            transform: translateY(-4px); 
+            background: rgba(255,255,255,0.04); 
+        }
+
+        .seo-content {
+            max-width: 800px; margin: 0 auto 2rem; padding: 0 2rem;
+            font-size: 14px; line-height: 1.6; color: #8A8A8E; text-align: center;
+        }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto; border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #8A8A8E;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <div class="linear-bg"></div>
+
+    <nav class="p-6 flex justify-between items-center border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0 z-50">
+        <a href="/" class="text-[10px] font-black tracking-widest opacity-50 hover:opacity-100 uppercase transition-opacity">← MISSION CONTROL</a>
+        <span class="text-[10px] font-black tracking-[0.3em] uppercase opacity-80">BSFREETOOLS</span>
+    </nav>
+
+    <header class="pt-24 pb-16 text-center px-6">
+        <h1 class="text-5xl md:text-6xl font-black italic uppercase tracking-tighter mb-4">IMAGE SUITE</h1>
+        <p class="text-sm font-medium max-w-2xl mx-auto leading-relaxed opacity-60">
+            Image utilities running entirely in your browser cache. Zero tracking, zero file uploads.
+        </p>
+    </header>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto px-10 pb-16 w-full">
+        
+        <a href="/image/bpc/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Blur, Pixel & Crop</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Obscure faces, hide specific visual data, and adjust canvas dimensions locally.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+        <a href="/image/bulk/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Bulk Editor</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Process multiple images simultaneously to apply repetitive edits and conversions.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+        <a href="/image/compress/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Image Compressor</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Reduce file sizes significantly for web use without server processing.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+        <a href="/image/converter/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Format Converter</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Instantly convert images between JPG, PNG, and WEBP formats directly in the browser.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+        <a href="/image/quicksizer/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">PWA QuickSizer</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Instantly generate 192x192 and 512x512 PNG manifest icons for Chrome and PWAs.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+        <a href="/image/remove/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Metadata Remover</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Strip hidden EXIF data and GPS coordinates from your photos before sharing.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+        <a href="/image/resizer/" class="tool-card group">
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight mb-3">Image Resizer</h2>
+                <p class="text-sm opacity-60 leading-relaxed">Scale specific dimensions and adjust image proportions for web requirements.</p>
+            </div>
+            <div class="mt-8 text-[10px] font-black uppercase opacity-0 group-hover:opacity-100 text-blue-400 transition-opacity">Launch Utility →</div>
+        </a>
+
+    </main>
+
+    <article class="seo-content">
+        <h2 class="text-sm font-bold text-white mb-2">Browser-Based Image Utilities</h2>
+        <p>
+            The BSFreeTools Image Suite provides utilities for modifying image files directly within your web browser. Tools include options for resizing, compressing, metadata removal, bulk processing, PWA icon generation, and selective blurring. All processing utilizes the HTML5 Canvas API, meaning files are handled locally on your device rather than being transmitted to a remote server. Users are responsible for evaluating the suitability of these tools for their specific requirements.
+        </p>
+    </article>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-16 text-center border-t border-white/5">
+        <div class="mb-8">
+            <a href="https://ko-fi.com/richardliu" target="_blank" class="text-[10px] font-black uppercase tracking-widest border border-white/10 px-8 py-3 rounded-full hover:bg-white hover:text-black transition-all">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-30">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+</body>
+</html>

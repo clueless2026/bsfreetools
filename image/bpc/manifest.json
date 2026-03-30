@@ -1,0 +1,21 @@
+{
+  "name": "Blur, Pixel & Crop",
+  "short_name": "BPC Tool",
+  "description": "A browser-based utility to blur faces, pixelate sensitive data, and crop images locally.",
+  "start_url": "/bpc/",
+  "display": "standalone",
+  "background_color": "#080809",
+  "theme_color": "#080809",
+  "icons": [
+    {
+      "src": "/bpc/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/bpc/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

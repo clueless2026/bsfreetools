@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blur, Pixelate & Crop | Private & Free | BSFreeTools</title>
+    
+    <meta name="description" content="A browser-based utility to blur faces, pixelate sensitive data, and crop images. 100% private local processing. Use at your own discretion.">
+    <link rel="canonical" href="https://bsfreetools.com/bpc/">
+    
+    <meta name="theme-color" content="#080809">
+    <link rel="manifest" href="/bpc/manifest.json">
+
+    <meta property="og:title" content="Private Blur, Pixel & Crop - BSFreeTools" />
+    <meta property="og:description" content="Blur faces, pixelate data, and crop photos locally in your browser. No data leaves your device." />
+    <meta property="og:url" content="https://bsfreetools.com/bpc/" />
+    <meta property="og:type" content="website" />
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Private Blur, Pixel & Crop - BSFreeTools">
+    <meta name="twitter:description" content="Blur faces, pixelate data, and crop photos locally in your browser.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 120px auto 40px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px); width: 95%;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--text-main);
+            background: var(--hover-light);
+            transform: scale(1.01);
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%; border: none; cursor: pointer;
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.02); }
+
+        .btn-tool {
+            background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+            padding: 10px 20px; border-radius: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+
+        .btn-tool:hover { background: var(--hover-light); color: var(--text-main); }
+        .tool-active { background: var(--text-main) !important; color: var(--bg-base) !important; border-color: var(--text-main) !important; transform: scale(1.05); }
+
+        canvas {
+            border: 1px solid var(--card-border); touch-action: none;
+            max-width: 100%; border-radius: 12px; background: #000;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); margin: 0 auto;
+        }
+
+        input[type="range"] { width: 100%; accent-color: var(--text-main); cursor: pointer; }
+
+        select {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--card-border);
+            color: var(--text-main); padding: 12px 20px; border-radius: 12px;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+            cursor: pointer; outline: none; width: 100%; text-align: center;
+            appearance: none;
+        }
+
+        .seo-content {
+            max-width: 800px; margin: 0 auto 2rem; padding: 0 2rem;
+            font-size: 14px; line-height: 1.6; color: var(--text-secondary); text-align: center;
+        }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+
+        #toast { transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
+        .toast-visible { opacity: 1 !important; transform: translateY(0) !important; }
+    </style>
+</head>
+<body id="drop-area">
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/image/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO IMAGE SUITE
+        </a>
+    </nav>
+
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 -translate-y-4 opacity-0 bg-[var(--text-main)] text-[var(--bg-base)] px-6 py-3 rounded-full shadow-2xl z-50 text-xs font-black tracking-widest uppercase" role="alert"></div>
+
+    <div class="tool-container">
+        <h1 class="text-3xl md:text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            BLUR, PIXEL & CROP
+        </h1>
+        <p class="mt-4 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Prepare your images locally. Obscure sensitive data and resize canvases before sharing.
+        </p>
+
+        <div class="drop-zone" id="drop-zone">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop photo here or click to select
+            </p>
+            <input type="file" id="file-input" accept="image/jpeg,image/webp,image/png" class="hidden">
+        </div>
+
+        <div id="controls" class="hidden flex flex-col gap-6 w-full mt-4">
+            
+            <div class="flex flex-wrap items-center justify-center gap-2 p-2 bg-[rgba(0,0,0,0.3)] rounded-2xl border border-[var(--card-border)]">
+                <button onclick="App.setMode('blur')" id="btn-blur" class="btn-tool">BLUR</button>
+                <button onclick="App.setMode('pixelate')" id="btn-pixelate" class="btn-tool">PIXEL</button>
+                <div class="w-[1px] h-6 bg-[var(--card-border)] mx-2"></div>
+                <button onclick="App.setMode('crop')" id="btn-crop" class="btn-tool text-[var(--text-main)] border-white/20">CROP BOX</button>
+                <div class="w-[1px] h-6 bg-[var(--card-border)] mx-2"></div>
+                <button onclick="App.undo()" id="btn-undo" class="btn-tool !text-red-400 !border-red-900/30 hover:!bg-red-900/20" title="Undo Last Action">UNDO</button>
+            </div>
+
+            <div id="standardTools" class="flex flex-wrap items-center justify-center gap-8 px-6 py-4 rounded-xl border border-[var(--card-border)] bg-[rgba(255,255,255,0.02)]">
+                <div class="flex flex-col items-center w-24">
+                    <label for="brushSize" class="text-[9px] font-bold text-[var(--text-secondary)] tracking-widest uppercase mb-2">Brush</label>
+                    <input type="range" id="brushSize" min="10" max="200" value="50">
+                </div>
+                <div class="flex flex-col items-center w-24">
+                    <label for="intensity" class="text-[9px] font-bold text-[var(--text-secondary)] tracking-widest uppercase mb-2">Density</label>
+                    <input type="range" id="intensity" min="1" max="100" value="30">
+                </div>
+            </div>
+
+            <div id="cropTools" class="hidden flex items-center justify-center gap-4 px-6 py-4 rounded-xl border border-[var(--card-border)] bg-[rgba(255,255,255,0.02)]">
+                <button onclick="App.cancelCrop()" class="btn-tool">✖ CANCEL</button>
+                <button onclick="App.executeCrop()" class="btn-primary !w-auto !px-6 !py-3 !text-[11px]">✔ APPLY CROP</button>
+            </div>
+
+            <div class="relative bg-[var(--bg-base)] border border-[var(--card-border)] rounded-2xl flex justify-center p-2 overflow-hidden mx-auto w-full">
+                <canvas id="canvas" aria-label="Interactive Photo Editor Workspace"></canvas>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-2 pt-2">
+                <span class="text-[9px] font-bold text-[var(--text-secondary)] tracking-widest uppercase flex items-center mr-2">AUTO CROP:</span>
+                <button onclick="App.applyAutoCrop(1,1)" class="btn-tool !py-2 !px-3 !text-[9px]">1:1 SQ</button>
+                <button onclick="App.applyAutoCrop(9,16)" class="btn-tool !py-2 !px-3 !text-[9px]">9:16 STORY</button>
+                <button onclick="App.applyAutoCrop(16,9)" class="btn-tool !py-2 !px-3 !text-[9px]">16:9 YT</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-6 border-t border-[var(--card-border)]">
+                <select id="exportFormat" class="col-span-1">
+                    <option value="image/jpeg">JPG Output</option>
+                    <option value="image/png">PNG Output</option>
+                    <option value="image/webp">WEBP Output</option>
+                </select>
+                <button onclick="App.download()" class="btn-primary col-span-1 sm:col-span-2">
+                    Save Image Locally
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <article class="seo-content">
+        <h2 class="text-sm font-bold text-[var(--text-main)] mb-2">Local Image Blurring and Cropping Utility</h2>
+        <p>
+            Welcome to the BPC tool, built by BSFreeTools.com. This utility allows you to crop photos for social media or quickly blur and pixelate specific areas of an image. All rendering and processing happens locally via the HTML5 Canvas in your web browser. No data is sent to a server. Ensure you follow standard best practices when handling sensitive files and use at your own discretion.
+        </p>
+    </article>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        const AppState = {
+            mode: 'none', 
+            isAction: false,
+            brushSize: 50,
+            intensity: 30, 
+            lastTouchX: 0,
+            lastTouchY: 0,
+            toastTimeout: null,
+            history: [],
+            cropBox: { x: 0, y: 0, w: 0, h: 0 },
+            cropDragTarget: null 
+        };
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('toast-visible');
+            clearTimeout(AppState.toastTimeout);
+            AppState.toastTimeout = setTimeout(() => toast.classList.remove('toast-visible'), 3000);
+        }
+
+        const App = {
+            init: function() {
+                const dropZone = document.getElementById('drop-zone');
+                const fileInput = document.getElementById('file-input');
+                const dropArea = document.getElementById('drop-area');
+
+                document.getElementById('brushSize').addEventListener('input', e => {
+                    AppState.brushSize = parseInt(e.target.value);
+                    App.updateCursor();
+                });
+                
+                document.getElementById('intensity').addEventListener('input', e => {
+                    AppState.intensity = parseInt(e.target.value);
+                });
+
+                dropZone.addEventListener('click', () => fileInput.click());
+                
+                // Full screen drag and drop handling
+                ['dragover', 'dragenter'].forEach(evt => {
+                    dropArea.addEventListener(evt, (e) => {
+                        e.preventDefault(); dropZone.classList.add('drag-over');
+                    });
+                });
+                ['dragleave', 'dragend', 'drop'].forEach(evt => {
+                    dropArea.addEventListener(evt, (e) => {
+                        e.preventDefault(); dropZone.classList.remove('drag-over');
+                    });
+                });
+                dropArea.addEventListener('drop', (e) => {
+                    if (e.dataTransfer.files.length) this.processFile(e.dataTransfer.files[0]);
+                });
+                
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length) this.processFile(e.target.files[0]);
+                });
+                
+                canvas.addEventListener('pointerdown', this.startAction.bind(this));
+                canvas.addEventListener('pointermove', this.doAction.bind(this));
+                window.addEventListener('pointerup', this.endAction.bind(this));
+                window.addEventListener('pointercancel', this.endAction.bind(this));
+                
+                this.updateCursor();
+            },
+
+            updateCursor: function() {
+                if (AppState.mode === 'none' || AppState.mode === 'crop') {
+                    canvas.style.cursor = 'default';
+                    return;
+                }
+                const size = AppState.brushSize;
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                                <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 1}" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.8"/>
+                             </svg>`;
+                const encoded = btoa(svg);
+                canvas.style.cursor = `url('data:image/svg+xml;base64,${encoded}') ${size/2} ${size/2}, crosshair`;
+            },
+
+            saveState: function() {
+                if (AppState.history.length >= 10) AppState.history.shift(); 
+                AppState.history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            },
+
+            undo: function() {
+                if (AppState.mode === 'crop') return; 
+                if (AppState.history.length > 0) {
+                    const previousState = AppState.history.pop();
+                    if (previousState.width !== canvas.width || previousState.height !== canvas.height) {
+                        canvas.width = previousState.width;
+                        canvas.height = previousState.height;
+                    }
+                    ctx.putImageData(previousState, 0, 0);
+                } else {
+                    showToast("Nothing left to undo");
+                }
+            },
+
+            processFile: function(file) {
+                if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
+                    showToast("HEIC not supported yet. Please use JPG/PNG.");
+                    return;
+                }
+                const img = new Image();
+                img.onload = () => {
+                    const MAX = 1600; 
+                    let scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    AppState.history = []; 
+                    
+                    document.getElementById('file-label').textContent = file.name.toUpperCase();
+                    document.getElementById('drop-zone').classList.add('hidden');
+                    document.getElementById('controls').classList.remove('hidden');
+                    
+                    App.setMode('blur');
+                };
+                img.src = URL.createObjectURL(file);
+            },
+
+            setMode: function(m) {
+                if (AppState.mode === 'crop' && m !== 'crop') {
+                    ctx.drawImage(offCanvas, 0, 0); 
+                    document.getElementById('cropTools').classList.add('hidden');
+                    document.getElementById('standardTools').classList.remove('hidden');
+                    document.getElementById('btn-undo').classList.remove('hidden');
+                }
+
+                AppState.mode = m;
+                
+                document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
+                    btn.classList.remove('tool-active');
+                });
+                
+                const activeBtn = document.getElementById(`btn-${m}`);
+                if(activeBtn && m !== 'undo') {
+                    activeBtn.classList.add('tool-active');
+                }
+
+                if (m === 'crop') {
+                    document.getElementById('standardTools').classList.add('hidden');
+                    document.getElementById('btn-undo').classList.add('hidden');
+                    document.getElementById('cropTools').classList.remove('hidden');
+                    
+                    offCanvas.width = canvas.width; offCanvas.height = canvas.height;
+                    offCtx.drawImage(canvas, 0, 0);
+                    
+                    const w = canvas.width * 0.8;
+                    const h = canvas.height * 0.8;
+                    AppState.cropBox = { x: (canvas.width - w) / 2, y: (canvas.height - h) / 2, w: w, h: h };
+                    this.drawCropOverlay();
+                }
+
+                App.updateCursor();
+            },
+
+            drawCropOverlay: function() {
+                ctx.drawImage(offCanvas, 0, 0);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const b = AppState.cropBox;
+                ctx.clearRect(b.x, b.y, b.w, b.h);
+                ctx.drawImage(offCanvas, b.x, b.y, b.w, b.h, b.x, b.y, b.w, b.h);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(b.x + b.w/3, b.y); ctx.lineTo(b.x + b.w/3, b.y + b.h);
+                ctx.moveTo(b.x + (b.w/3)*2, b.y); ctx.lineTo(b.x + (b.w/3)*2, b.y + b.h);
+                ctx.moveTo(b.x, b.y + b.h/3); ctx.lineTo(b.x + b.w, b.y + b.h/3);
+                ctx.moveTo(b.x, b.y + (b.h/3)*2); ctx.lineTo(b.x + b.w, b.y + (b.h/3)*2);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+                ctx.fillStyle = '#FFFFFF';
+                const hSize = 12;
+                ctx.fillRect(b.x - hSize/2, b.y - hSize/2, hSize, hSize); 
+                ctx.fillRect(b.x + b.w - hSize/2, b.y - hSize/2, hSize, hSize); 
+                ctx.fillRect(b.x - hSize/2, b.y + b.h - hSize/2, hSize, hSize); 
+                ctx.fillRect(b.x + b.w - hSize/2, b.y + b.h - hSize/2, hSize, hSize); 
+            },
+
+            getCropHitTarget: function(x, y) {
+                const b = AppState.cropBox;
+                const t = 20; 
+                if (Math.abs(x - b.x) < t && Math.abs(y - b.y) < t) return 'nw';
+                if (Math.abs(x - (b.x + b.w)) < t && Math.abs(y - b.y) < t) return 'ne';
+                if (Math.abs(x - b.x) < t && Math.abs(y - (b.y + b.h)) < t) return 'sw';
+                if (Math.abs(x - (b.x + b.w)) < t && Math.abs(y - (b.y + b.h)) < t) return 'se';
+                if (x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h) return 'move';
+                return null;
+            },
+
+            cancelCrop: function() {
+                this.setMode('blur'); 
+            },
+
+            executeCrop: function() {
+                this.saveState();
+                const b = AppState.cropBox;
+                
+                const finalX = b.w > 0 ? b.x : b.x + b.w;
+                const finalY = b.h > 0 ? b.y : b.y + b.h;
+                const finalW = Math.abs(b.w);
+                const finalH = Math.abs(b.h);
+
+                const temp = document.createElement('canvas');
+                temp.width = finalW; temp.height = finalH;
+                temp.getContext('2d').drawImage(offCanvas, finalX, finalY, finalW, finalH, 0, 0, finalW, finalH);
+                
+                canvas.width = finalW; canvas.height = finalH;
+                ctx.drawImage(temp, 0, 0);
+                
+                offCanvas.width = finalW; offCanvas.height = finalH;
+                offCtx.drawImage(temp, 0, 0);
+
+                showToast("CROP APPLIED");
+                
+                document.getElementById('cropTools').classList.add('hidden');
+                document.getElementById('standardTools').classList.remove('hidden');
+                document.getElementById('btn-undo').classList.remove('hidden');
+                
+                AppState.mode = 'none'; 
+                this.setMode('blur');
+            },
+
+            getCoords: function(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (e.clientX - rect.left) * (canvas.width / rect.width),
+                    y: (e.clientY - rect.top) * (canvas.height / rect.height)
+                };
+            },
+
+            startAction: function(e) {
+                if (AppState.mode === 'none') return; 
+
+                const {x, y} = App.getCoords(e);
+                AppState.lastTouchX = x; AppState.lastTouchY = y;
+                
+                if (AppState.mode === 'crop') {
+                    AppState.cropDragTarget = this.getCropHitTarget(x, y);
+                    if (AppState.cropDragTarget) AppState.isAction = true;
+                    return;
+                }
+                
+                App.saveState(); 
+                AppState.isAction = true;
+                App.handleEffect(x, y);
+            },
+
+            doAction: function(e) {
+                if (!AppState.isAction) return;
+                
+                if (AppState.mode === 'crop') {
+                    const {x, y} = App.getCoords(e);
+                    const dx = x - AppState.lastTouchX;
+                    const dy = y - AppState.lastTouchY;
+                    const b = AppState.cropBox;
+
+                    if (AppState.cropDragTarget === 'move') {
+                        b.x += dx; b.y += dy;
+                    } else if (AppState.cropDragTarget === 'nw') {
+                        b.x += dx; b.w -= dx; b.y += dy; b.h -= dy;
+                    } else if (AppState.cropDragTarget === 'ne') {
+                        b.w += dx; b.y += dy; b.h -= dy;
+                    } else if (AppState.cropDragTarget === 'sw') {
+                        b.x += dx; b.w -= dx; b.h += dy;
+                    } else if (AppState.cropDragTarget === 'se') {
+                        b.w += dx; b.h += dy;
+                    }
+
+                    AppState.lastTouchX = x; AppState.lastTouchY = y;
+                    requestAnimationFrame(() => this.drawCropOverlay());
+                    return;
+                }
+
+                requestAnimationFrame(() => {
+                    if(!AppState.isAction) return;
+                    const {x, y} = App.getCoords(e);
+                    App.handleEffect(x, y);
+                });
+            },
+
+            endAction: function(e) {
+                AppState.isAction = false;
+                AppState.cropDragTarget = null;
+            },
+
+            handleEffect: function(x, y) {
+                const bs = AppState.brushSize;
+
+                if (AppState.mode === 'blur') {
+                    const aggressive = Math.max(2, AppState.intensity / 10);
+                    const scaledW = bs / aggressive; const scaledH = bs / aggressive;
+                    
+                    offCanvas.width = bs; offCanvas.height = bs;
+                    offCtx.imageSmoothingEnabled = true; 
+                    offCtx.drawImage(canvas, x - bs/2, y - bs/2, bs, bs, 0, 0, scaledW, scaledH);
+                    
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(x, y, bs/2, 0, Math.PI * 2); ctx.clip();
+                    ctx.filter = `blur(${Math.max(2, AppState.intensity / 3)}px)`; 
+                    ctx.drawImage(offCanvas, 0, 0, scaledW, scaledH, x - bs/2, y - bs/2, bs, bs); 
+                    ctx.restore();
+                }
+                else if (AppState.mode === 'pixelate') {
+                    const pixelSize = Math.max(2, AppState.intensity / 5); 
+                    offCanvas.width = bs; offCanvas.height = bs;
+                    offCtx.imageSmoothingEnabled = false; 
+                    const scaledW = bs / pixelSize; const scaledH = bs / pixelSize;
+                    offCtx.drawImage(canvas, x - bs/2, y - bs/2, bs, bs, 0, 0, scaledW, scaledH);
+                    
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(x, y, bs/2, 0, Math.PI * 2); ctx.clip();
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(offCanvas, 0, 0, scaledW, scaledH, x - bs/2, y - bs/2, bs, bs);
+                    ctx.restore(); ctx.imageSmoothingEnabled = true;
+                }
+                
+                AppState.lastTouchX = x; AppState.lastTouchY = y;
+            },
+
+            applyAutoCrop: function(ratioW, ratioH) {
+                if (AppState.mode === 'crop') {
+                    AppState.mode = 'none';
+                    App.setMode('blur');
+                }
+                
+                App.saveState(); 
+                let targetW = canvas.width; let targetH = (canvas.width / ratioW) * ratioH;
+                if (targetH > canvas.height) { targetH = canvas.height; targetW = (canvas.height / ratioH) * ratioW; }
+                const startX = (canvas.width - targetW) / 2; const startY = (canvas.height - targetH) / 2;
+                
+                offCanvas.width = targetW; offCanvas.height = targetH;
+                offCtx.filter = 'none'; 
+                offCtx.drawImage(canvas, startX, startY, targetW, targetH, 0, 0, targetW, targetH);
+                
+                canvas.width = targetW; canvas.height = targetH;
+                ctx.drawImage(offCanvas, 0, 0);
+                showToast("CROP APPLIED");
+            },
+
+            download: function() {
+                const format = document.getElementById('exportFormat').value;
+                const ext = format.split('/')[1]; 
+                const link = document.createElement('a');
+                link.download = `BPC_Tool_Local.${ext}`;
+                link.href = canvas.toDataURL(format, 0.92); link.click();
+            }
+        };
+
+        App.init();
+
+        if('serviceWorker' in navigator){
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/bpc/sw.js', { scope: '/bpc/' }).catch(err => console.log('SW not active'));
+            });
+        }
+    </script>
+</body>
+</html>

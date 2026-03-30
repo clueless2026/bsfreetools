@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor & Converter | Private & Free | BSFreeTools</title>
+    
+    <meta name="description" content="Compress and convert JPG, PNG, and WEBP images instantly. Reduce file size and change formats in your browser. 100% private, no uploads required.">
+    <link rel="canonical" href="https://bsfreetools.com/image/compress/">
+    
+    <meta property="og:title" content="Private Image Compressor & Converter - BSFreeTools" />
+    <meta property="og:description" content="Optimize images locally. Compress file size and convert between JPG, PNG, and WebP without uploading data." />
+    <meta property="og:url" content="https://bsfreetools.com/image/compress/" />
+    <meta property="og:type" content="website" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 160px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--text-main);
+            background: var(--hover-light);
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.05); }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--text-main);
+        }
+
+        select {
+            background: var(--bg-base);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+        }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/image/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO IMAGE SUITE
+        </a>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            IMAGE OPTIMIZER
+        </h1>
+        <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Compress and convert images locally in your browser. Our tool ensures your files are optimized for the web without ever leaving your device.
+        </p>
+
+        <div class="drop-zone" id="drop-zone">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop image here or click to select
+            </p>
+            <input type="file" id="file-input" accept="image/jpeg,image/webp,image/png" class="hidden">
+        </div>
+
+        <div id="controls" class="hidden flex flex-col gap-8 items-center">
+            
+            <div class="flex flex-wrap justify-center gap-10 w-full max-w-md">
+                <div class="flex-1 text-left">
+                    <label class="text-[10px] font-bold uppercase tracking-widest block mb-4">Quality: <span id="quality-val" class="text-[var(--text-main)]">80</span>%</label>
+                    <input type="range" id="quality" min="10" max="100" value="80">
+                </div>
+
+                <div class="text-left">
+                    <label class="text-[10px] font-bold uppercase tracking-widest block mb-4">Output Format</label>
+                    <select id="format-select">
+                        <option value="image/jpeg">JPG</option>
+                        <option value="image/webp" selected>WEBP</option>
+                        <option value="image/png">PNG</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="stats" class="text-[10px] font-mono opacity-60 w-full flex justify-between px-4 border-t border-white/5 pt-6"></div>
+
+            <button id="compress-btn" class="btn-primary">
+                Optimize & Download
+            </button>
+        </div>
+    </div>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const qualitySlider = document.getElementById('quality');
+        const formatSelect = document.getElementById('format-select');
+        const compressBtn = document.getElementById('compress-btn');
+        
+        let currentFile = null;
+        let originalImg = new Image();
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            currentFile = file;
+            document.getElementById('file-label').textContent = file.name.toUpperCase();
+            document.getElementById('controls').classList.remove('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                originalImg.src = event.target.result;
+                originalImg.onload = () => runPreviewCompression();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        [qualitySlider, formatSelect].forEach(el => {
+            el.addEventListener('input', () => {
+                document.getElementById('quality-val').textContent = qualitySlider.value;
+                if(currentFile) runPreviewCompression();
+            });
+        });
+
+        function runPreviewCompression() {
+            const quality = qualitySlider.value / 100;
+            const format = formatSelect.value;
+            const canvas = document.createElement('canvas');
+            canvas.width = originalImg.width;
+            canvas.height = originalImg.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(originalImg, 0, 0);
+            
+            const dataUrl = canvas.toDataURL(format, quality);
+            const imgSize = Math.round((dataUrl.length - dataUrl.split(',')[0].length) * 3 / 4);
+            
+            document.getElementById('stats').innerHTML = `
+                <span>ORIGINAL: ${(currentFile.size / 1024).toFixed(2)} KB</span>
+                <span class="text-emerald-500">NEW (${format.split('/')[1].toUpperCase()}): ${(imgSize / 1024).toFixed(2)} KB</span>
+            `;
+        }
+
+        compressBtn.addEventListener('click', () => {
+            const quality = qualitySlider.value / 100;
+            const format = formatSelect.value;
+            const ext = format.split('/')[1];
+            const canvas = document.createElement('canvas');
+            canvas.width = originalImg.width;
+            canvas.height = originalImg.height;
+            canvas.getContext('2d').drawImage(originalImg, 0, 0);
+            
+            const dataUrl = canvas.toDataURL(format, quality);
+            const link = document.createElement('a');
+            link.download = `optimized_${currentFile.name.split('.')[0]}.${ext}`;
+            link.href = dataUrl;
+            link.click();
+        });
+    </script>
+</body>
+</html>

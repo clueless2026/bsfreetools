@@ -3,180 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSFreeTools | Bullshit Free Browser Utilities</title>
+    <title>BSFreeTools | Browser-Based Utility PWAs</title>
     
-    <meta name="description" content="A fleet of fast, private tools that run entirely in your web browser. No subscriptions, no cloud tracking, and no file uploads.">
+    <meta name="description" content="BSFreeTools offers a collection of browser-based PWAs for PDF editing, image compression, health tracking, development, and more. Data stays on your device.">
+    <meta name="keywords" content="PWA, browser tools, PDF merge, image compressor, DEV utilities, text tools, SEO tools">
     <link rel="canonical" href="https://bsfreetools.com/">
+    <meta name="robots" content="index, follow">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta property="og:title" content="BSFreeTools | Browser-Based Utility PWAs">
+    <meta property="og:description" content="Privacy-focused, local-execution tools for daily tasks. No file uploads, no mandatory accounts.">
+    <meta property="og:url" content="https://bsfreetools.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://bsfreetools.com/assets/og-main.png">
 
+    <meta name="theme-color" content="#080809">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "BSFreeTools",
+      "url": "https://bsfreetools.com/",
+      "description": "Browser-based utility PWAs for daily tasks. Local execution, no mandatory accounts."
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --bg-base: #080809;
-            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-bg: rgba(255, 255, 255, 0.015);
             --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #FFFFFF;
             --text-secondary: #8A8A8E;
+            --text-tools: rgba(255, 255, 255, 0.9);
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+            --hover-border: rgba(255, 255, 255, 0.5);
+            --beta-bg: #1e1e24;
+            --beta-text: #a1a1aa;
         }
-        
+
+        [data-theme="light"] {
+            --bg-base: #E2E2E7; 
+            --card-bg: #FFFFFF; 
+            --card-border: rgba(0, 0, 0, 0.12);
+            --text-main: #1D1D1F;
+            --text-secondary: #424245;
+            --text-tools: #1D1D1F;
+            --nav-bg: rgba(226, 226, 231, 0.8);
+            --hover-light: #F5F5F7; 
+            --hover-border: rgba(0, 0, 0, 0.4);
+            --beta-bg: #e4e4e7;
+            --beta-text: #52525b;
+        }
+
         body {
             background-color: var(--bg-base);
-            color: var(--text-main);
+            color: var(--text-secondary);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-            margin: 0; min-height: 100vh;
+            margin: 0;
+            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+            scroll-behavior: smooth;
+        }
+
+        .beta-banner {
+            background: var(--beta-bg);
+            color: var(--beta-text);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            text-align: center;
+            padding: 6px 0;
+            position: fixed;
+            top: 0; width: 100%; z-index: 100;
+            border-bottom: 1px solid var(--card-border);
         }
 
         .linear-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), var(--bg-base);
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%),
+                linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%),
+                var(--bg-base);
         }
 
-        .category-card { 
-            background: var(--card-bg); 
+        .linear-bg::after {
+            content: ""; position: absolute; inset: 0; opacity: 0.05; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .text-gradient {
+            background: linear-gradient(180deg, var(--text-main) 0%, #636366 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--card-border);
+            top: 25px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .grid-layout { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .category-card {
+            background: var(--card-bg);
             border: 1px solid var(--card-border); 
-            border-radius: 20px; 
-            padding: 2.5rem; 
-            transition: all 0.3s ease; 
-            display: flex; 
-            flex-direction: column; 
-            text-decoration: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.03);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
+            overflow: hidden;
+            border-radius: 24px;
         }
 
-        .category-card:hover { 
-            border-color: rgba(255,255,255,0.3); 
-            transform: translateY(-4px); 
-            background: rgba(255,255,255,0.04); 
+        .category-card:hover {
+            border-color: var(--hover-border);
+            transform: translateY(-6px);
+            background: var(--hover-light);
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.3);
         }
 
-        .status-badge {
-            font-size: 8px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            padding: 3px 10px;
+        .mode-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 8px 20px;
             border-radius: 99px;
-            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
         }
 
-        .status-online { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+        .tool-list {
+            color: var(--text-tools);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .legal-box {
+            background: rgba(0,0,0,0.05);
+            border: 1px solid var(--card-border);
+            padding: 40px;
+            border-radius: 24px;
+            margin: 60px auto 0;
+            max-width: 900px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .beta-tag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Ad Slot Styling */
+        .ad-container {
+            max-width: 900px;
+            margin: 60px auto;
+            text-align: center;
+            border: 1px dashed var(--card-border);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
-
+    <div class="beta-banner">Beta Release • Local Browser Execution Framework</div>
     <div class="linear-bg"></div>
 
-    <nav class="p-6 flex justify-between items-center border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0 z-50">
-        <span class="text-[10px] font-black tracking-[0.4em] uppercase opacity-80">BSFREETOOLS</span>
-        <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest border border-white/10 px-6 py-2 rounded-full hover:bg-white hover:text-black transition-all">Support</a>
+    <nav class="fixed z-50 w-full px-10 py-5 flex items-center justify-between">
+        <a href="/" class="font-bold text-sm tracking-[0.3em] uppercase text-[var(--text-main)] hover:opacity-70 transition-opacity">
+            BSFREETOOLS <span class="beta-tag">BETA</span>
+        </a>
+        <div class="flex items-center gap-10">
+            <div class="hidden md:flex gap-10 text-[10px] font-bold uppercase tracking-[0.2em]">
+                <a href="#all-tools" class="hover:text-[var(--text-main)] transition-colors">All Tools</a>
+                <a href="#about" class="hover:text-[var(--text-main)] transition-colors">About</a>
+            </div>
+            <button onclick="toggleTheme()" class="mode-toggle" id="themeBtn">Light Mode</button>
+        </div>
     </nav>
 
-    <header class="pt-24 pb-16 text-center px-6">
-        <h1 class="text-6xl md:text-8xl font-black italic uppercase tracking-tighter mb-4 text-white">BSFREETOOLS</h1>
-        <p class="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 mb-8">BULLSHIT FREE TOOLS</p>
-        <p class="text-sm font-medium max-w-xl mx-auto leading-relaxed text-[#8A8A8E]">
-            Private, browser-based utilities that process data on your hardware. No accounts, no tracking, no file uploads to our servers.
-        </p>
+    <header class="pt-56 pb-16 text-center px-6">
+        <h1 class="text-7xl md:text-[10rem] font-black tracking-tighter italic uppercase text-gradient leading-none">
+            BSFREETOOLS
+        </h1>
+        <div class="mt-4 text-[10px] md:text-xs font-bold uppercase tracking-[1em] text-slate-500 opacity-60">
+            B******T FREE TOOLS
+        </div>
+        <div class="mt-12 max-w-2xl mx-auto">
+            <p class="text-[var(--text-secondary)] font-medium leading-relaxed text-base">
+                BSFreeTools provides a suite of simple, browser-based PWAs designed to handle tasks without sending your data to a server. These tools run locally in your modern web browser for speed and privacy.
+            </p>
+        </div>
     </header>
 
-    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 max-w-[1600px] mx-auto px-6 pb-20 w-full">
-        
-        <a href="/pdf/" class="category-card group">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">01</span>
-                <span class="status-badge status-online">Online</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white group-hover:text-emerald-400 transition-colors">PDF Tools</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Merge, split, compress, and scan documents.</p>
-        </a>
+    <main id="all-tools" class="grid-layout pb-20 px-10">
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">PDF Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/pdf/merge/" class="hover:text-[var(--text-main)] transition-colors">01 / Merge PDF</a></li>
+                <li><a href="/pdf/compress/" class="hover:text-[var(--text-main)] transition-colors">02 / Compress PDF</a></li>
+                <li><a href="/pdf/metadata/" class="hover:text-[var(--text-main)] transition-colors">03 / Remove Metadata</a></li>
+                <li class="pt-4"><a href="/pdf/" class="opacity-40 hover:opacity-100 transition-opacity">View All PDF Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/images/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">02</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Image Tools</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">EXIF stripping, resizing, and conversion.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Image Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/image/compress/" class="hover:text-[var(--text-main)] transition-colors">01 / Image Compressor</a></li>
+                <li><a href="/image/resize/" class="hover:text-[var(--text-main)] transition-colors">02 / Dimensions Resizer</a></li>
+                <li><a href="/image/metadata/" class="hover:text-[var(--text-main)] transition-colors">03 / EXIF Remover</a></li>
+                <li class="pt-4"><a href="/image/" class="opacity-40 hover:opacity-100 transition-opacity">View All Image Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/video/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">03</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Video Tools</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Compression and frame extraction.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">DEV Utilities</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/dev/json/" class="hover:text-[var(--text-main)] transition-colors">01 / JSON Formatter</a></li>
+                <li><a href="/dev/cleaner/" class="hover:text-[var(--text-main)] transition-colors">02 / Code Cleaner</a></li>
+                <li><a href="/dev/base64/" class="hover:text-[var(--text-main)] transition-colors">03 / Base64 Encode/Decode</a></li>
+                <li class="pt-4"><a href="/dev/" class="opacity-40 hover:opacity-100 transition-opacity">View All DEV Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/audio/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">04</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Audio Tools</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Trimming and format conversion.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">SEO Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/seo/meta/" class="hover:text-[var(--text-main)] transition-colors">01 / Meta Builder</a></li>
+                <li><a href="/seo/og/" class="hover:text-[var(--text-main)] transition-colors">02 / OG Validator</a></li>
+                <li><a href="/seo/canonical/" class="hover:text-[var(--text-main)] transition-colors">03 / Canonical Builder</a></li>
+                <li class="pt-4"><a href="/seo/" class="opacity-40 hover:opacity-100 transition-opacity">View All SEO Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/text/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">05</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Text Tools</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Cleaning, formatting, and analysis.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Text Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/text/counter/" class="hover:text-[var(--text-main)] transition-colors">01 / Word Counter</a></li>
+                <li><a href="/text/case/" class="hover:text-[var(--text-main)] transition-colors">02 / Case Converter</a></li>
+                <li><a href="/text/diff/" class="hover:text-[var(--text-main)] transition-colors">03 / Diff Checker</a></li>
+                <li class="pt-4"><a href="/text/" class="opacity-40 hover:opacity-100 transition-opacity">View All Text Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/security/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">06</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Security</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Password auditing and file hashing.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Misc Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/misc/random/" class="hover:text-[var(--text-main)] transition-colors">01 / Random Generator</a></li>
+                <li><a href="/misc/units/" class="hover:text-[var(--text-main)] transition-colors">02 / Unit Converter</a></li>
+                <li><a href="/misc/password/" class="hover:text-[var(--text-main)] transition-colors">03 / Password Gen</a></li>
+                <li class="pt-4"><a href="/misc/" class="opacity-40 hover:opacity-100 transition-opacity">View All Misc Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/dev/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">07</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Dev Utilities</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">JSON formatting and code cleaning.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Audio Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/audio/trimmer/" class="hover:text-[var(--text-main)] transition-colors">01 / Audio Trimmer</a></li>
+                <li><a href="/audio/volume/" class="hover:text-[var(--text-main)] transition-colors">02 / Volume Booster</a></li>
+                <li><a href="/audio/converter/" class="hover:text-[var(--text-main)] transition-colors">03 / Format Converter</a></li>
+                <li class="pt-4"><a href="/audio/" class="opacity-40 hover:opacity-100 transition-opacity">View All Audio Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/finance/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">08</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Finance</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Sovereign Ledger and FIRE calculators.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Video Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/video/trimmer/" class="hover:text-[var(--text-main)] transition-colors">01 / Video Trimmer</a></li>
+                <li><a href="/video/extract/" class="hover:text-[var(--text-main)] transition-colors">02 / Extract Audio</a></li>
+                <li><a href="/video/gif/" class="hover:text-[var(--text-main)] transition-colors">03 / GIF Maker</a></li>
+                <li class="pt-4"><a href="/video/" class="opacity-40 hover:opacity-100 transition-opacity">View All Video Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/social/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">09</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Social</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Username checks and link cleaning.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Health Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/health/bmi/" class="hover:text-[var(--text-main)] transition-colors">01 / BMI Calculator</a></li>
+                <li><a href="/health/tdee/" class="hover:text-[var(--text-main)] transition-colors">02 / TDEE Calculator</a></li>
+                <li><a href="/health/macros/" class="hover:text-[var(--text-main)] transition-colors">03 / Macro Tracker</a></li>
+                <li class="pt-4"><a href="/health/" class="opacity-40 hover:opacity-100 transition-opacity">View All Health Tools →</a></li>
+            </ul>
+        </div>
 
-        <a href="/health/" class="category-card group opacity-50 grayscale">
-            <div class="flex justify-between items-start mb-6">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">10</span>
-                <span class="status-badge">Locked</span>
-            </div>
-            <h2 class="text-xl font-black uppercase tracking-tight text-white">Health</h2>
-            <p class="text-[11px] text-[#8A8A8E] mt-3 leading-relaxed">Solo Alpha diet and macro tracking.</p>
-        </a>
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Finance Tools</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/finance/dividend/" class="hover:text-[var(--text-main)] transition-colors">01 / Dividend Calculator</a></li>
+                <li><a href="/finance/compound/" class="hover:text-[var(--text-main)] transition-colors">02 / Compound Interest</a></li>
+                <li><a href="/finance/ledger/" class="hover:text-[var(--text-main)] transition-colors">03 / Cash Flow Ledger</a></li>
+                <li class="pt-4"><a href="/finance/" class="opacity-40 hover:opacity-100 transition-opacity">View All Finance Tools →</a></li>
+            </ul>
+        </div>
 
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Action Trackers</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/getitdone/tracker/" class="hover:text-[var(--text-main)] transition-colors">01 / Tracker</a></li>
+                <li><a href="/getitdone/bulk/" class="hover:text-[var(--text-main)] transition-colors">02 / Bulk Manager</a></li>
+                <li><a href="/getitdone/momentum/" class="hover:text-[var(--text-main)] transition-colors">03 / Momentum Score</a></li>
+                <li class="pt-4"><a href="/getitdone/" class="opacity-40 hover:opacity-100 transition-opacity">View All Progress Tools →</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Language & Logic</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/logic/translator/" class="hover:text-[var(--text-main)] transition-colors">01 / Translator</a></li>
+                <li><a href="/logic/scrubber/" class="hover:text-[var(--text-main)] transition-colors">02 / Word Scrubber</a></li>
+                <li><a href="/logic/cards/" class="hover:text-[var(--text-main)] transition-colors">03 / Vocabulary Cards</a></li>
+                <li class="pt-4"><a href="/logic/" class="opacity-40 hover:opacity-100 transition-opacity">View All Logic Tools →</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Relaxing Games</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/games/breathe/" class="hover:text-[var(--text-main)] transition-colors">01 / Breathing Bubble</a></li>
+                <li><a href="/games/memory/" class="hover:text-[var(--text-main)] transition-colors">02 / Memory Match</a></li>
+                <li><a href="/games/tictactoe/" class="hover:text-[var(--text-main)] transition-colors">03 / Zen Tic-Tac-Toe</a></li>
+                <li class="pt-4"><a href="/games/" class="opacity-40 hover:opacity-100 transition-opacity">View All Games →</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card p-12 flex flex-col">
+            <h2 class="text-4xl font-black italic uppercase text-gradient">Time & Date</h2>
+            <ul class="mt-8 tool-list space-y-4">
+                <li><a href="/time/duration/" class="hover:text-[var(--text-main)] transition-colors">01 / Duration Calculator</a></li>
+                <li><a href="/time/timezone/" class="hover:text-[var(--text-main)] transition-colors">02 / Timezone Converter</a></li>
+                <li><a href="/time/pomodoro/" class="hover:text-[var(--text-main)] transition-colors">03 / Pomodoro Timer</a></li>
+                <li class="pt-4"><a href="/time/" class="opacity-40 hover:opacity-100 transition-opacity">View All Time Tools →</a></li>
+            </ul>
+        </div>
     </main>
 
-    <div class="max-w-4xl mx-auto px-10 pb-20 leading-relaxed text-[11px] opacity-40 text-center uppercase tracking-widest">
-        <p>Distributed by BSFREETOOLS.COM • Build fast. Live free.</p>
+    <div class="ad-container">
+        <span class="text-[10px] uppercase tracking-widest opacity-30">Advertisement Space</span>
     </div>
 
+    <section id="about" class="max-w-5xl mx-auto px-10 mb-32">
+        <div class="legal-box">
+            <h3 class="text-[var(--text-main)] font-black mb-6 uppercase tracking-[0.3em] text-sm">Local Execution Framework</h3>
+            <p class="mb-6 opacity-60 font-medium italic leading-relaxed">
+                This site operates as a collection of Progressive Web Apps. This architecture allows the tools to process data within your browser session. Files and data are not transmitted to or stored on our servers.
+            </p>
+            <p class="font-black uppercase text-[11px] tracking-widest mb-4">No Warranties & Liability:</p>
+            <p class="opacity-40 italic leading-relaxed">
+                These tools are provided "as-is" for general utility. No guarantees, promises, or assurances are made regarding the accuracy or reliability of any tool output. Use of BSFreeTools is entirely at your own risk. The developer assumes no liability for data loss or any consequences arising from the use of these tools.
+            </p>
+        </div>
+    </section>
+
+    <footer class="mt-auto py-20 border-t border-white/5 text-center px-10">
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-40">Distributed by BSFREETOOLS.COM • 2026</p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                body.removeAttribute('data-theme');
+                btn.innerText = 'Light Mode';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = 'Dark Mode';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metadata Remover | Private & Free | BSFreeTools</title>
+    
+    <meta name="description" content="Remove hidden EXIF metadata, GPS, and camera info from photos. 100% private browser processing. Use at your own discretion.">
+    <link rel="canonical" href="https://bsfreetools.com/image/remove/">
+    
+    <meta name="theme-color" content="#080809">
+    <link rel="manifest" href="/image/remove/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    <meta property="og:title" content="Private Metadata Remover - BSFreeTools" />
+    <meta property="og:description" content="Wipe hidden data from photos locally. No data leaves your device." />
+    <meta property="og:url" content="https://bsfreetools.com/image/remove/" />
+    <meta property="og:type" content="website" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 160px auto 40px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px); width: 95%;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--text-main);
+            background: var(--hover-light);
+            transform: scale(1.01);
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.02); }
+
+        .meta-grid {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 16px;
+            max-height: 200px; overflow-y: auto;
+            text-align: left; font-family: monospace; font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .meta-item {
+            display: flex; justify-content: space-between;
+            padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.05);
+        }
+        
+        .meta-item:last-child { border-bottom: none; }
+        .meta-key { color: var(--text-main); font-weight: bold; }
+
+        .seo-content {
+            max-width: 800px; margin: 0 auto 2rem; padding: 0 2rem;
+            font-size: 14px; line-height: 1.6; color: var(--text-secondary); text-align: center;
+        }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/image/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO IMAGE SUITE
+        </a>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            METADATA REMOVER
+        </h1>
+        <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Inspect metadata and redraw pixels to a new file locally. Use at your own discretion.
+        </p>
+
+        <div class="drop-zone" id="drop-zone">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop photo here or click to select
+            </p>
+            <input type="file" id="file-input" accept="image/jpeg,image/webp,image/png" class="hidden">
+        </div>
+
+        <div id="controls" class="hidden flex flex-col gap-6 w-full max-w-md mx-auto">
+            <div class="text-left">
+                <label class="text-[10px] font-bold uppercase tracking-widest block mb-2 text-rose-500">Metadata Detected:</label>
+                <div id="meta-display" class="meta-grid"></div>
+            </div>
+
+            <button onclick="stripMetadata()" class="btn-primary">
+                Generate New File
+            </button>
+            <div id="status" class="text-[10px] font-black uppercase tracking-widest text-amber-500 min-h-[1rem]"></div>
+        </div>
+    </div>
+
+    <article class="seo-content">
+        <p>
+            Strip tracking data from photos before sharing. This tool attempts to remove EXIF, GPS, and camera metadata by redrawing pixels to a new canvas. No data is sent to a server. Verify critical files independently.
+        </p>
+    </article>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        let currentFile = null;
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/image/remove/sw.js', { scope: '/image/remove/' });
+            });
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFiles(e.target.files[0]);
+        });
+
+        function handleFiles(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            currentFile = file;
+            document.getElementById('file-label').textContent = file.name.toUpperCase();
+            document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('status').textContent = '';
+            
+            const metaDisplay = document.getElementById('meta-display');
+            metaDisplay.innerHTML = '<div class="text-center py-4 text-[10px]">READING...</div>';
+
+            EXIF.getData(file, function() {
+                const tags = EXIF.getAllTags(this);
+                metaDisplay.innerHTML = '';
+                if (Object.keys(tags).length === 0) {
+                    metaDisplay.innerHTML = '<div class="text-center py-4 text-[10px]">NO COMMON TAGS DETECTED.</div>';
+                } else {
+                    for (let tag in tags) {
+                        if (typeof tags[tag] !== 'object' && typeof tags[tag] !== 'function') {
+                            metaDisplay.innerHTML += `<div class="meta-item"><span class="meta-key">${tag}</span><span class="truncate max-w-[150px]">${tags[tag]}</span></div>`;
+                        }
+                    }
+                }
+            });
+        }
+
+        function stripMetadata() {
+            if(!currentFile) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    const link = document.createElement('a');
+                    link.download = `new_${currentFile.name.split('.')[0]}.jpg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.90);
+                    link.click();
+                    document.getElementById('status').textContent = 'NEW FILE GENERATED';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(currentFile);
+        }
+    </script>
+</body>
+</html>

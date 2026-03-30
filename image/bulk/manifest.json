@@ -1,0 +1,21 @@
+{
+  "name": "BSFreeTools Bulk Image Processor",
+  "short_name": "Bulk Process",
+  "description": "Batch resize, compress, and convert multiple images instantly. 100% private.",
+  "start_url": "/bulk/",
+  "display": "standalone",
+  "background_color": "#080809",
+  "theme_color": "#080809",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

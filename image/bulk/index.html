@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Image Processor | Private & Free | BSFreeTools</title>
+    
+    <meta name="description" content="Batch resize, compress, and convert multiple images instantly. 100% private browser-based bulk image processing.">
+    <link rel="canonical" href="https://bsfreetools.com/bulk/">
+    <meta property="og:title" content="Private Bulk Image Processor - BSFreeTools" />
+    <meta property="og:description" content="Process multiple images locally in your browser. No data leaves your device." />
+    <meta property="og:url" content="https://bsfreetools.com/bulk/" />
+    <meta property="og:type" content="website" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 160px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--text-main);
+            background: var(--hover-light);
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.02); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        input[type="number"], select {
+            background: var(--bg-base); color: var(--text-main);
+            border: 1px solid var(--card-border); padding: 12px 20px;
+            border-radius: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase;
+            width: 100%; appearance: none;
+        }
+        
+        input[type="number"] { font-family: monospace; }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+
+        .progress-bar-container {
+            width: 100%; background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 99px; height: 8px; overflow: hidden; margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%; background: var(--text-main); width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/image/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO IMAGE SUITE
+        </a>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            BULK PROCESSOR
+        </h1>
+        <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Resize and convert multiple images simultaneously. All files are processed locally and packaged into a single ZIP file for download.
+        </p>
+
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop multiple images here or click to select
+            </p>
+            <input type="file" id="file-input" multiple accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+        </div>
+
+        <div id="controls" class="hidden flex flex-col gap-6 items-center w-full max-w-sm mx-auto">
+            <div class="flex gap-4 w-full">
+                <div class="flex-1 text-left">
+                    <label class="text-[10px] font-bold uppercase tracking-widest block mb-2">Max Width (px)</label>
+                    <input type="number" id="max-width" value="1200">
+                </div>
+                <div class="flex-1 text-left">
+                    <label class="text-[10px] font-bold uppercase tracking-widest block mb-2">Format</label>
+                    <div class="relative">
+                        <select id="format-select">
+                            <option value="image/jpeg">JPG</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/webp">WEBP</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--text-main)]">▼</div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="process-btn" onclick="runBulk()" class="btn-primary">
+                Process to ZIP
+            </button>
+            
+            <div id="status-container" class="w-full hidden text-left">
+                <div id="status-text" class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2"></div>
+                <div class="progress-bar-container">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        let stagedFiles = [];
+
+        function handleFileSelect(e) {
+            stagedFiles = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+            if (stagedFiles.length > 0) {
+                document.getElementById('controls').classList.remove('hidden');
+                document.getElementById('file-label').textContent = `${stagedFiles.length} FILES STAGED`;
+                document.getElementById('status-container').classList.add('hidden');
+                document.getElementById('progress-fill').style.width = '0%';
+            }
+        }
+
+        async function runBulk() {
+            if(!stagedFiles.length) return;
+            
+            const btn = document.getElementById('process-btn');
+            const statusContainer = document.getElementById('status-container');
+            const statusText = document.getElementById('status-text');
+            const progressFill = document.getElementById('progress-fill');
+            const maxWidth = parseInt(document.getElementById('max-width').value);
+            const format = document.getElementById('format-select').value;
+            const ext = format.split('/')[1].replace('jpeg', 'jpg');
+            
+            btn.disabled = true;
+            statusContainer.classList.remove('hidden');
+            const zip = new JSZip();
+
+            try {
+                for(let i = 0; i < stagedFiles.length; i++) {
+                    statusText.textContent = `PROCESSING ${i+1} OF ${stagedFiles.length}`;
+                    const blob = await processSingleImage(stagedFiles[i], maxWidth, format);
+                    zip.file(`processed_${i+1}_${stagedFiles[i].name.split('.')[0]}.${ext}`, blob);
+                    
+                    // Update progress bar
+                    progressFill.style.width = `${((i + 1) / stagedFiles.length) * 100}%`;
+                }
+
+                statusText.textContent = 'GENERATING ZIP FILE...';
+                const content = await zip.generateAsync({type: "blob"});
+                
+                // Trigger download natively
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = "bsfreetools_batch.zip";
+                link.click();
+                
+                statusText.textContent = 'SUCCESS: DOWNLOAD STARTED';
+            } catch (err) {
+                console.error(err);
+                statusText.textContent = 'ERROR PROCESSING IMAGES';
+                statusText.classList.replace('text-emerald-500', 'text-rose-500');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function processSingleImage(file, maxWidth, format) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((maxWidth / width) * height);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        
+                        if (format === 'image/jpeg') {
+                            ctx.fillStyle = "#FFFFFF";
+                            ctx.fillRect(0, 0, width, height);
+                        }
+                        
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => resolve(blob), format, 0.9);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+</html>

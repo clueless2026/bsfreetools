@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BS Free HTML Forge</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { --m-dark: #121212; --m-mid: #1e1e1e; --steel: #4a90e2; --border: #2a2a2a; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--m-dark); color: #e0e0e0; font-family: sans-serif; overflow: hidden; }
+        
+        nav { height: 50px; background: #1a1a1a; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 2px solid #000; box-shadow: inset 0 1px 0 #333; }
+        .btn { background: #333; border: 1px solid #111; color: #ccc; padding: 6px 12px; cursor: pointer; font-size: 11px; text-transform: uppercase; border-radius: 3px; font-weight: bold; }
+        .btn-ai { border-color: var(--steel); color: var(--steel); box-shadow: 0 0 5px rgba(74, 144, 226, 0.2); }
+
+        /* The Container for everything below the Nav */
+        .wrapper { display: flex; height: calc(100vh - 50px); }
+
+        /* Main Workspace (Editor + Preview) */
+        main { display: flex; flex: 1; background: #000; }
+        .pane { flex: 1; display: flex; flex-direction: column; position: relative; border-right: 1px solid #000; }
+        .pane-label { background: #1a1a1a; padding: 6px 15px; font-size: 10px; font-weight: bold; color: #555; border-bottom: 1px solid #000; letter-spacing: 1px; }
+
+        textarea { flex: 1; background: var(--m-mid); color: #9cdcfe; border: none; padding: 20px; font-family: 'Consolas', monospace; font-size: 14px; outline: none; resize: none; line-height: 1.5; }
+        textarea::placeholder { color: #3a3a3a; font-style: italic; }
+
+        .preview-container { flex: 1; position: relative; background: #fff; display: flex; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; z-index: 2; }
+        
+        .preview-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; background: #f5f5f5; z-index: 1; }
+
+        /* Right Sidebar Ad Area */
+        aside { 
+            width: 180px; background: #0f0f0f; border-left: 2px solid #000; 
+            display: flex; flex-direction: column; align-items: center; padding-top: 20px;
+        }
+        .ad-zone {
+            width: 160px; height: 600px; background: #151515; border: 1px dashed #222;
+            display: flex; align-items: center; justify-content: center;
+            color: #444; font-size: 10px; text-transform: uppercase; text-align: center;
+        }
+
+        #ai-status { font-size: 9px; color: #333; position: absolute; bottom: 5px; right: 10px; }
+
+        /* Focus Mode logic */
+        body.focus nav, body.focus aside, body.focus .pane:first-child { display: none; }
+        #exit-f { position: fixed; top: 15px; right: 15px; z-index: 99; display: none; }
+        body.focus #exit-f { display: block; }
+    </style>
+</head>
+<body>
+
+    <button id="exit-f" class="btn" onclick="toggleF()">Exit Focus Mode</button>
+
+    <nav>
+        <span style="font-weight:800; color:#555; letter-spacing: 2px;">HTML FORGE</span>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-ai" id="ai-btn" onclick="askAI()">AI Assist</button>
+            <button class="btn" onclick="toggleF()">Focus Mode</button>
+            <button class="btn" onclick="clearAll()" style="color:#a55;">Wipe Forge</button>
+        </div>
+    </nav>
+
+    <div class="wrapper">
+        <main>
+            <div class="pane">
+                <div class="pane-label">EDITOR SOURCE</div>
+                <textarea id="editor" placeholder="PASTE CODE HERE..." spellcheck="false"></textarea>
+                <div id="ai-status">AI: CHECKING...</div>
+            </div>
+
+            <div class="pane">
+                <div class="pane-label">LIVE PREVIEW</div>
+                <div class="preview-container">
+                    <div class="preview-placeholder" id="placeholder-text">Preview will appear here</div>
+                    <iframe id="preview"></iframe>
+                </div>
+            </div>
+        </main>
+
+        <aside>
+            <div style="font-size: 9px; color: #333; margin-bottom: 10px;">ADVERTISEMENT</div>
+            <div class="ad-zone">
+                160x600 Skyscraper Slot
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const ed = document.getElementById('editor');
+        const pre = document.getElementById('preview');
+        const stat = document.getElementById('ai-status');
+        const placeholder = document.getElementById('placeholder-text');
+        let session = null;
+
+        window.onload = () => {
+            const saved = localStorage.getItem('forge_v1');
+            if (saved) { ed.value = saved; update(); }
+            initAI();
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+        };
+
+        ed.oninput = () => { update(); localStorage.setItem('forge_v1', ed.value); };
+
+        function update() { 
+            pre.srcdoc = ed.value; 
+            placeholder.style.display = ed.value.trim() === "" ? "flex" : "none";
+        }
+
+        function toggleF() { document.body.classList.toggle('focus'); }
+        function clearAll() { if(confirm("Wipe the entire forge?")) { ed.value=""; update(); localStorage.removeItem('forge_v1'); } }
+
+        async function initAI() {
+            if (window.ai && window.ai.languageModel) {
+                try {
+                    const available = await window.ai.languageModel.availability();
+                    if (available === 'available') {
+                        stat.innerText = "LOCAL AI: ACTIVE"; stat.style.color = "#4a90e2";
+                        session = await window.ai.languageModel.create();
+                    } else { stat.innerText = "LOCAL AI: DOWNLOADING..."; }
+                } catch(e) { stat.innerText = "LOCAL AI: UNAVAILABLE"; }
+            } else { stat.innerText = "LOCAL AI: NOT SUPPORTED"; }
+        }
+
+        async function askAI() {
+            if (!session) return alert("Gemini Nano not detected.");
+            const p = prompt("What should the AI forge for you?");
+            if (p) {
+                const res = await session.prompt(`Write HTML/CSS for: ${p}. Context: ${ed.value}`);
+                ed.value += "\n" + res; update();
+            }
+        }
+    </script>
+</body>
+</html>

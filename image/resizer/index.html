@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer | Private & Free | BSFreeTools</title>
+    
+    <meta name="description" content="Resize images by exact pixels or percentages directly in your browser. Maintain aspect ratios instantly. 100% private.">
+    <link rel="canonical" href="https://bsfreetools.com/image/resizer/">
+    
+    <meta name="theme-color" content="#080809">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    <meta property="og:title" content="Private Image Resizer - BSFreeTools" />
+    <meta property="og:description" content="Scale and resize images locally. No data leaves your device." />
+    <meta property="og:url" content="https://bsfreetools.com/image/resizer/" />
+    <meta property="og:type" content="website" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg-base: #080809;
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-secondary: #8A8A8E;
+            --nav-bg: rgba(8, 8, 9, 0.8);
+            --hover-light: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; min-height: 100vh; -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column;
+        }
+
+        .linear-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.03) 0%, transparent 40%), var(--bg-base);
+        }
+
+        .tool-container {
+            max-width: 800px; margin: 160px auto 60px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 3rem; text-align: center;
+            backdrop-filter: blur(10px); width: 95%;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 16px; padding: 40px; margin: 24px 0;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--text-main);
+            background: var(--hover-light);
+            transform: scale(1.02);
+        }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-base);
+            padding: 14px 40px; border-radius: 99px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.15em; font-size: 12px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary:hover:not(:disabled) { transform: scale(1.05); }
+
+        input[type="number"] {
+            background: var(--bg-base); color: var(--text-main);
+            border: 1px solid var(--card-border); padding: 10px;
+            border-radius: 8px; font-family: monospace; text-align: center;
+            width: 100%;
+        }
+
+        .ad-container {
+            max-width: 800px; margin: 2rem auto;
+            border: 1px dashed var(--card-border);
+            height: 90px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="linear-bg"></div>
+
+    <nav class="fixed top-0 z-50 w-full px-10 py-6 flex items-center justify-between bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--card-border)]">
+        <a href="/image/" class="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-main)] opacity-60 hover:opacity-100 transition-opacity">
+            ← BACK TO IMAGE SUITE
+        </a>
+    </nav>
+
+    <div class="tool-container">
+        <h1 class="text-4xl font-black italic uppercase text-[var(--text-main)] tracking-tight leading-none">
+            IMAGE RESIZER
+        </h1>
+        <p class="mt-6 text-sm font-medium leading-relaxed max-w-md mx-auto">
+            Scale by exact pixels or percentage. 100% private browser processing. No images are uploaded to a server.
+        </p>
+
+        <div class="drop-zone" id="drop-zone">
+            <p id="file-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">
+                Drop image here or click to select
+            </p>
+            <input type="file" id="file-input" accept="image/*" class="hidden">
+        </div>
+
+        <div id="controls" class="hidden flex flex-col gap-6 items-center w-full max-w-sm mx-auto">
+            <div class="flex gap-4 w-full">
+                <div class="flex-1 text-left">
+                    <label class="text-[10px] font-bold uppercase tracking-widest block mb-2">Width (px)</label>
+                    <input type="number" id="width-input" oninput="handleWidthChange()">
+                </div>
+                <div class="flex-1 text-left">
+                    <label class="text-[10px] font-bold uppercase tracking-widest block mb-2">Height (px)</label>
+                    <input type="number" id="height-input" oninput="handleHeightChange()">
+                </div>
+            </div>
+
+            <div class="w-full text-left flex items-center gap-2">
+                <input type="checkbox" id="aspect-ratio" checked class="w-4 h-4 accent-[var(--text-main)]">
+                <label for="aspect-ratio" class="text-[10px] font-bold uppercase tracking-widest">Lock Aspect Ratio</label>
+            </div>
+
+            <div class="w-full text-left">
+                <label class="text-[10px] font-bold uppercase tracking-widest block mb-2">Scale by %</label>
+                <input type="number" id="percent-input" value="100" min="1" max="500" oninput="handlePercentChange()">
+            </div>
+
+            <button onclick="processResize()" class="btn-primary w-full mt-4">
+                Resize & Download
+            </button>
+        </div>
+    </div>
+
+    <div class="ad-container">
+        <span>Advertisement Space</span>
+    </div>
+
+    <footer class="mt-auto py-12 text-center">
+        <div class="mb-6">
+            <a href="https://ko-fi.com/bsfreetools" target="_blank" class="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity border border-white/10 px-6 py-2 rounded-full">
+                Support via Ko-fi
+            </a>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[1em] opacity-20">Distributed by BSFREETOOLS.COM</p>
+    </footer>
+
+    <script>
+        let originalImg = new Image();
+        let currentFileName = "image.png";
+        let aspectRatio = 1;
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFiles(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFiles(e.target.files[0]);
+        });
+
+        function handleFiles(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            currentFileName = file.name;
+            document.getElementById('file-label').textContent = file.name.toUpperCase();
+            document.getElementById('controls').classList.remove('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                originalImg = new Image();
+                originalImg.onload = () => {
+                    aspectRatio = originalImg.width / originalImg.height;
+                    document.getElementById('width-input').value = originalImg.width;
+                    document.getElementById('height-input').value = originalImg.height;
+                    document.getElementById('percent-input').value = 100;
+                };
+                originalImg.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleWidthChange() {
+            const w = document.getElementById('width-input').value;
+            if (document.getElementById('aspect-ratio').checked) {
+                document.getElementById('height-input').value = Math.round(w / aspectRatio);
+            }
+            updatePercentage();
+        }
+
+        function handleHeightChange() {
+            const h = document.getElementById('height-input').value;
+            if (document.getElementById('aspect-ratio').checked) {
+                document.getElementById('width-input').value = Math.round(h * aspectRatio);
+            }
+            updatePercentage();
+        }
+
+        function handlePercentChange() {
+            const p = document.getElementById('percent-input').value / 100;
+            document.getElementById('width-input').value = Math.round(originalImg.width * p);
+            document.getElementById('height-input').value = Math.round(originalImg.height * p);
+        }
+
+        function updatePercentage() {
+            const w = document.getElementById('width-input').value;
+            if (originalImg.width) {
+                document.getElementById('percent-input').value = Math.round((w / originalImg.width) * 100);
+            }
+        }
+
+        function processResize() {
+            const w = parseInt(document.getElementById('width-input').value);
+            const h = parseInt(document.getElementById('height-input').value);
+            if (!w || !h) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(originalImg, 0, 0, w, h);
+            
+            const link = document.createElement('a');
+            link.download = `resized_${currentFileName}`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
