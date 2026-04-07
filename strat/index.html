@@ -21,12 +21,15 @@
             overflow: hidden; 
             background: #cbd5e1; 
             color: #0f172a; 
-            min-width: 1024px; 
+            min-width: 0; 
         }
         
+        @media (min-width: 1024px) {
+            body { min-width: 1024px; }
+        }
+
         @media (max-width: 1366px) {
-            body { min-width: 100vw; }
-            .silo-sidebar { width: 400px; }
+            .silo-sidebar { width: min(400px, 100%) !important; max-width: 100%; }
         }
 
         /* Calendar & Rail */
@@ -62,16 +65,16 @@
 </head>
 <body class="h-screen flex flex-col">
 
-    <nav class="bg-white border-b-8 border-indigo-800 px-8 pt-12 pb-6 flex justify-between items-center z-50">
-        <div class="flex items-center gap-6">
-            <select id="activeProject" onchange="syncUI()" class="font-black text-5xl text-indigo-900 outline-none bg-transparent tracking-tighter cursor-pointer"></select>
-            <button id="masterBtn" onclick="toggleMaster()" class="px-8 py-3 border-4 border-indigo-200 text-indigo-700 rounded-3xl font-black text-xs uppercase hover:bg-indigo-50 transition-all">Summarized View</button>
+    <nav class="bg-white border-b-8 border-indigo-800 px-4 sm:px-8 pt-8 sm:pt-12 pb-4 sm:pb-6 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center z-50">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 min-w-0">
+            <select id="activeProject" onchange="syncUI()" class="font-black text-3xl sm:text-5xl text-indigo-900 outline-none bg-transparent tracking-tighter cursor-pointer min-w-0 max-w-full"></select>
+            <button id="masterBtn" onclick="toggleMaster()" class="px-6 sm:px-8 py-3 border-4 border-indigo-200 text-indigo-700 rounded-3xl font-black text-xs uppercase hover:bg-indigo-50 transition-all shrink-0">Summarized View</button>
         </div>
-        <button onclick="toggleVault()" class="p-4 px-10 bg-slate-900 rounded-[2rem] font-black text-xs uppercase text-white shadow-2xl hover:bg-slate-800 transition-colors">🛡️ System Vault</button>
+        <button onclick="toggleVault()" class="p-4 px-8 sm:px-10 bg-slate-900 rounded-[2rem] font-black text-xs uppercase text-white shadow-2xl hover:bg-slate-800 transition-colors shrink-0">🛡️ System Vault</button>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden">
-        <aside class="w-32 bg-slate-200 border-r-4 border-slate-400 p-3 flex flex-col items-center overflow-y-auto no-scrollbar">
+    <div class="flex flex-1 overflow-hidden min-h-0">
+        <aside class="w-24 sm:w-32 bg-slate-200 border-r-4 border-slate-400 p-2 sm:p-3 flex flex-col items-center overflow-y-auto no-scrollbar shrink-0">
             <div class="w-full mb-6 mt-4">
                 <label class="text-[9px] font-black text-slate-500 uppercase mb-2 block text-center">Year</label>
                 <select id="yearPicker" onchange="updateYear(this.value)" class="w-full bg-white border-2 border-slate-400 rounded-xl p-2 font-black text-indigo-700 text-center text-sm outline-none cursor-pointer"></select>
@@ -79,29 +82,29 @@
             <div id="monthGrid" class="flex flex-col w-full gap-1"></div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto no-scrollbar p-12">
-            <h2 id="mainDateHeader" class="text-7xl font-black italic text-slate-900 uppercase tracking-tighter mb-10 ml-4"></h2>
-            <div id="calendarGrid" class="calendar-grid mx-auto"></div>
+        <main class="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-12 min-w-0">
+            <h2 id="mainDateHeader" class="text-4xl sm:text-7xl font-black italic text-slate-900 uppercase tracking-tighter mb-6 sm:mb-10 ml-0 sm:ml-4 break-words"></h2>
+            <div id="calendarGrid" class="calendar-grid mx-auto max-w-full"></div>
         </main>
     </div>
 
-    <div id="vaultMenu" class="fixed inset-0 bg-slate-900/95 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-xl">
-        <div class="bg-white w-full max-w-4xl rounded-[4rem] p-16 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h3 class="font-black text-6xl mb-12 text-center uppercase italic text-indigo-900">System Vault</h3>
-            <div class="grid grid-cols-2 gap-16 mb-16">
-                <div class="bg-slate-50 p-10 rounded-[3rem] border-4 border-slate-200">
+    <div id="vaultMenu" class="fixed inset-0 bg-slate-900/95 z-[300] hidden flex items-center justify-center p-4 sm:p-6 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-4xl rounded-[2rem] sm:rounded-[4rem] p-8 sm:p-16 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h3 class="font-black text-3xl sm:text-6xl mb-8 sm:mb-12 text-center uppercase italic text-indigo-900">System Vault</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-16 mb-8 sm:mb-16">
+                <div class="bg-slate-50 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border-4 border-slate-200">
                     <label class="text-[12px] font-black text-indigo-600 uppercase block mb-6">Tag Architect</label>
                     <div id="tagBuilder" class="space-y-4 mb-6"></div>
                     <button onclick="addTagRow()" class="w-full py-4 border-2 border-dashed border-indigo-300 text-indigo-500 font-bold text-xs rounded-2xl hover:bg-indigo-50">+ New Tag</button>
                 </div>
-                <div class="bg-slate-50 p-10 rounded-[3rem] border-4 border-slate-200">
+                <div class="bg-slate-50 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border-4 border-slate-200">
                     <label class="text-[12px] font-black text-indigo-600 uppercase block mb-6">Client Silos</label>
                     <div id="projectBuilder" class="space-y-4 mb-6"></div>
                     <button onclick="addProjectRow()" class="w-full py-4 border-2 border-dashed border-indigo-300 text-indigo-500 font-bold text-xs rounded-2xl hover:bg-indigo-50">+ New Silo</button>
                 </div>
             </div>
-            <button onclick="applyVault()" class="w-full py-8 bg-indigo-700 text-white rounded-[2.5rem] font-black text-2xl shadow-2xl uppercase hover:bg-indigo-800 transition-colors">Apply & Sync</button>
-            <div class="grid grid-cols-2 gap-6 mt-6">
+            <button onclick="applyVault()" class="w-full py-6 sm:py-8 bg-indigo-700 text-white rounded-[2rem] sm:rounded-[2.5rem] font-black text-lg sm:text-2xl shadow-2xl uppercase hover:bg-indigo-800 transition-colors">Apply & Sync</button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6">
                 <button onclick="downloadBackup()" class="py-4 border-4 border-slate-200 rounded-2xl text-[11px] font-black text-slate-500 uppercase hover:bg-slate-100">Backup JSON</button>
                 <button onclick="exportAllToCSV()" class="py-4 bg-slate-200 rounded-2xl text-[11px] font-black text-slate-700 uppercase hover:bg-slate-300">Export CSV</button>
             </div>
@@ -109,35 +112,35 @@
         </div>
     </div>
 
-    <div id="drillDownMenu" class="fixed inset-0 bg-slate-900/80 z-[400] hidden flex items-center justify-center p-6 backdrop-blur-xl">
-        <div class="bg-white w-full max-w-md rounded-[3rem] p-12 shadow-2xl text-center border-4 border-slate-200">
-            <h3 class="font-black text-2xl mb-8 text-indigo-900 uppercase tracking-widest italic">Select Client Silo</h3>
+    <div id="drillDownMenu" class="fixed inset-0 bg-slate-900/80 z-[400] hidden flex items-center justify-center p-4 sm:p-6 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-md rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 shadow-2xl text-center border-4 border-slate-200">
+            <h3 class="font-black text-xl sm:text-2xl mb-6 sm:mb-8 text-indigo-900 uppercase tracking-widest italic">Select Client Silo</h3>
             <div id="drillDownOptions" class="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar px-2"></div>
-            <button onclick="closeDrillDown()" class="mt-10 text-slate-400 font-black text-sm uppercase tracking-widest hover:text-slate-600 transition-colors">Cancel</button>
+            <button onclick="closeDrillDown()" class="mt-8 sm:mt-10 text-slate-400 font-black text-sm uppercase tracking-widest hover:text-slate-600 transition-colors">Cancel</button>
         </div>
     </div>
 
     <div id="editorModal" class="fixed inset-0 bg-slate-100 z-[150] hidden flex flex-col transition-transform transform translate-y-full">
-        <header class="p-8 pt-16 border-b-4 border-slate-400 flex justify-between items-center bg-white sticky top-0 z-50">
-            <div class="flex gap-4 items-center">
-                <button id="saveBtn" onclick="saveNoteFeedback()" class="bg-indigo-700 text-white px-10 py-5 rounded-[2rem] font-black text-sm shadow-xl hover:bg-indigo-800 transition-colors w-48">SAVE NOTE</button>
-                <button onclick="handleDone()" class="text-indigo-700 font-black text-2xl tracking-tighter uppercase px-6 hover:text-indigo-900 transition-colors">DONE</button>
+        <header class="p-4 sm:p-8 pt-12 sm:pt-16 border-b-4 border-slate-400 flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center bg-white sticky top-0 z-50">
+            <div class="flex gap-2 sm:gap-4 items-center order-2 lg:order-1">
+                <button id="saveBtn" onclick="saveNoteFeedback()" class="bg-indigo-700 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-[2rem] font-black text-xs sm:text-sm shadow-xl hover:bg-indigo-800 transition-colors w-40 sm:w-48 shrink-0">SAVE NOTE</button>
+                <button onclick="handleDone()" class="text-indigo-700 font-black text-lg sm:text-2xl tracking-tighter uppercase px-2 sm:px-6 hover:text-indigo-900 transition-colors">DONE</button>
             </div>
-            <div class="text-center absolute left-1/2 -translate-x-1/2">
-                <h1 id="editClientName" class="text-7xl font-black text-indigo-900 uppercase tracking-tighter italic">CLIENT</h1>
-                <h3 id="editDate" class="font-black text-slate-500 text-2xl uppercase italic">DATE</h3>
+            <div class="text-center lg:absolute lg:left-1/2 lg:-translate-x-1/2 order-1 lg:order-none min-w-0 px-2">
+                <h1 id="editClientName" class="text-3xl sm:text-5xl lg:text-7xl font-black text-indigo-900 uppercase tracking-tighter italic break-words">CLIENT</h1>
+                <h3 id="editDate" class="font-black text-slate-500 text-lg sm:text-2xl uppercase italic">DATE</h3>
             </div>
-            <div class="flex gap-4">
-                <button onclick="navDay(-1)" class="p-5 bg-slate-100 border-4 border-slate-300 rounded-2xl font-black text-2xl hover:bg-slate-200">◄</button>
-                <button onclick="navDay(1)" class="p-5 bg-slate-100 border-4 border-slate-300 rounded-2xl font-black text-2xl hover:bg-slate-200">►</button>
+            <div class="flex gap-2 sm:gap-4 justify-end order-3 lg:order-2">
+                <button type="button" onclick="navDay(-1)" class="p-4 sm:p-5 bg-slate-100 border-4 border-slate-300 rounded-2xl font-black text-xl sm:text-2xl hover:bg-slate-200">◄</button>
+                <button type="button" onclick="navDay(1)" class="p-4 sm:p-5 bg-slate-100 border-4 border-slate-300 rounded-2xl font-black text-xl sm:text-2xl hover:bg-slate-200">►</button>
             </div>
         </header>
 
-        <div class="flex-1 flex overflow-hidden">
-            <div class="flex-1 flex flex-col overflow-hidden">
-                <div class="command-bar">
-                    <button onmousedown="event.preventDefault(); applyFormatting('bold')" class="cmd-btn">Bold</button>
-                    <button onmousedown="event.preventDefault(); applyFormatting('italic')" class="cmd-btn italic">Italic</button>
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+            <div class="flex-1 flex flex-col overflow-hidden min-h-0 min-w-0">
+                <div class="command-bar px-4 sm:px-8 lg:px-12">
+                    <button type="button" onmousedown="event.preventDefault(); applyFormatting('bold')" class="cmd-btn">Bold</button>
+                    <button type="button" onmousedown="event.preventDefault(); applyFormatting('italic')" class="cmd-btn italic">Italic</button>
                     <select onchange="applyFormatting('fontSize', this.value); this.value='';" class="cmd-btn"><option value="">SIZE</option><option value="3">Normal</option><option value="5">Large</option><option value="7">Giant</option></select>
                     <select onchange="insertTable(this.value); this.value='';" class="cmd-btn"><option value="">+ TABLE</option><option value="2x2">2x2</option><option value="3x3">3x3</option><option value="4x2">4x2</option></select>
 
@@ -161,24 +164,24 @@
                         <div class="swatch" style="background-color: #ffffff;" onmousedown="event.preventDefault(); applyFormatting('hiliteColor', '#ffffff')"></div>
                     </div>
 
-                    <div class="flex-1"></div>
-                    <div id="tagBar" class="flex gap-2"></div>
+                    <div class="flex-1 min-w-[1rem]"></div>
+                    <div id="tagBar" class="flex gap-2 flex-wrap"></div>
                 </div>
 
-                <div class="flex-1 overflow-y-auto p-12 no-scrollbar">
+                <div class="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 no-scrollbar min-h-0">
                     <div id="actionContainer" class="space-y-3 mb-6"></div>
-                    <button onclick="addActionRow()" class="text-[11px] font-black text-indigo-700 uppercase underline mb-10">+ Add Action Item</button>
-                    <div id="strategySurface" contenteditable="true" oninput="markDirty()" class="rich-surface min-h-[700px]"></div>
-                    <div class="mt-16 pt-16 border-t-4 border-slate-400">
+                    <button type="button" onclick="addActionRow()" class="text-[11px] font-black text-indigo-700 uppercase underline mb-10">+ Add Action Item</button>
+                    <div id="strategySurface" contenteditable="true" oninput="markDirty()" class="rich-surface min-h-[320px] sm:min-h-[500px] lg:min-h-[700px]"></div>
+                    <div class="mt-10 sm:mt-16 pt-10 sm:pt-16 border-t-4 border-slate-400">
                         <label class="text-[11px] font-black text-slate-500 uppercase block mb-6">Asset Hub</label>
-                        <div id="assetLinks" contenteditable="true" oninput="markDirty()" class="rich-surface min-h-[200px] bg-slate-100"></div>
+                        <div id="assetLinks" contenteditable="true" oninput="markDirty()" class="rich-surface min-h-[120px] sm:min-h-[200px] bg-slate-100"></div>
                     </div>
                 </div>
             </div>
 
-            <aside class="silo-sidebar bg-white border-l-4 border-slate-400 flex flex-col overflow-hidden" style="width: 500px;">
-                <div class="p-8 font-black text-indigo-600 text-[12px] uppercase border-b-4 border-slate-200">Strategy Guardrail</div>
-                <div id="strategyBullets" contenteditable="true" oninput="markDirty();" class="rich-surface flex-1 overflow-y-auto border-none rounded-none bg-slate-50"></div>
+            <aside class="silo-sidebar bg-white border-t-4 lg:border-t-0 lg:border-l-4 border-slate-400 flex flex-col overflow-hidden min-h-[40vh] lg:min-h-0 lg:w-[500px] lg:max-w-[500px] lg:flex-shrink-0 w-full">
+                <div class="p-6 sm:p-8 font-black text-indigo-600 text-[12px] uppercase border-b-4 border-slate-200 shrink-0">Strategy Guardrail</div>
+                <div id="strategyBullets" contenteditable="true" oninput="markDirty()" class="rich-surface flex-1 overflow-y-auto border-none rounded-none bg-slate-50 min-h-[200px]"></div>
             </aside>
         </div>
     </div>
@@ -189,12 +192,47 @@
         let viewDate = new Date();
         let isSummarizedView = false;
 
+        function escapeHtmlAttr(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;');
+        }
+
+        function escapeHtmlText(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function csvEscapeField(value) {
+            const s = String(value ?? '');
+            if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+            return s;
+        }
+
+        function htmlToPlainText(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html || '';
+            return (tmp.textContent || tmp.innerText || '').replace(/\r\n|\r|\n/g, ' ').trim();
+        }
+
         function boot() {
-            db = JSON.parse(localStorage.getItem('hub_db')) || { entries: {}, strategy: {} };
-            config = JSON.parse(localStorage.getItem('hub_config')) || { 
-                projects: ["CLIENT 1"], 
-                tags: [{name: "SHOOT", color: "#ef4444"}, {name: "DRAFT", color: "#3b82f6"}, {name: "ADMIN", color: "#10b981"}] 
-            };
+            try {
+                db = JSON.parse(localStorage.getItem('hub_db')) || { entries: {}, strategy: {} };
+            } catch (e) {
+                db = { entries: {}, strategy: {} };
+            }
+            try {
+                config = JSON.parse(localStorage.getItem('hub_config')) || { 
+                    projects: ["CLIENT 1"], 
+                    tags: [{name: "SHOOT", color: "#ef4444"}, {name: "DRAFT", color: "#3b82f6"}, {name: "ADMIN", color: "#10b981"}] 
+                };
+            } catch (e) {
+                config = { projects: ["CLIENT 1"], tags: [{name: "SHOOT", color: "#ef4444"}, {name: "DRAFT", color: "#3b82f6"}, {name: "ADMIN", color: "#10b981"}] };
+            }
             if (!config.projects || config.projects.length === 0) config.projects = ["CLIENT 1"];
             initYearPicker();
             document.execCommand("styleWithCSS", false, true);
@@ -202,6 +240,13 @@
                 el.addEventListener('focus', () => lastFocusEl = el);
                 el.addEventListener('mouseup', () => lastFocusEl = el);
                 el.addEventListener('keyup', () => lastFocusEl = el);
+            });
+            window.addEventListener('beforeunload', (e) => {
+                const modal = document.getElementById('editorModal');
+                if (modal && !modal.classList.contains('hidden') && isDirty) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
             });
             syncNav(); renderCalendar();
         }
@@ -218,18 +263,25 @@
             }
         }
 
-        function updateYear(val) { viewDate.setFullYear(parseInt(val)); renderCalendar(); }
+        function updateYear(val) { viewDate.setFullYear(parseInt(val, 10)); renderCalendar(); }
         function jumpToMonth(i) { viewDate.setMonth(i); renderCalendar(); }
         function applyFormatting(cmd, val = null) { const t = lastFocusEl || document.getElementById('strategySurface'); t.focus(); if (cmd === 'hiliteColor') { if (!document.execCommand('hiliteColor', false, val)) document.execCommand('backColor', false, val); } else document.execCommand(cmd, false, val); markDirty(); }
         function insertTable(dims) { if (!dims) return; const t = lastFocusEl || document.getElementById('strategySurface'); t.focus(); const [rows, cols] = dims.split('x').map(Number); let html = '<br><table><tbody>'; for (let r = 0; r < rows; r++) { html += '<tr>'; for (let c = 0; c < cols; c++) html += '<td>&nbsp;</td>'; html += '</tr>'; } html += '</tbody></table><br>'; document.execCommand('insertHTML', false, html); markDirty(); }
-        function insertHeading(name, color) { const t = lastFocusEl || document.getElementById('strategySurface'); t.focus(); const html = `<div><br></div><div style="color:${color}; font-weight:900; font-size:1.3rem;">[ ${name} ]</div><div>&nbsp;</div>`; document.execCommand('insertHTML', false, html); markDirty(); }
+        function insertHeading(name, color) {
+            const t = lastFocusEl || document.getElementById('strategySurface');
+            t.focus();
+            const safe = /^#[0-9A-Fa-f]{6}$/.test(String(color)) ? color : '#475569';
+            const html = `<div><br></div><div style="color:${safe}; font-weight:900; font-size:1.3rem;">[ ${escapeHtmlText(name)} ]</div><div>&nbsp;</div>`;
+            document.execCommand('insertHTML', false, html);
+            markDirty();
+        }
 
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
             const client = document.getElementById('activeProject').value || config.projects[0];
             const m = viewDate.getMonth(), y = viewDate.getFullYear();
             document.getElementById('mainDateHeader').innerText = `${months[m]} ${y}`;
-            document.getElementById('monthGrid').innerHTML = months.map((name, i) => `<button onclick="jumpToMonth(${i})" class="month-rail-btn ${m === i ? 'month-active' : ''}">${name}</button>`).join('');
+            document.getElementById('monthGrid').innerHTML = months.map((name, i) => `<button type="button" onclick="jumpToMonth(${i})" class="month-rail-btn ${m === i ? 'month-active' : ''}">${name}</button>`).join('');
             const firstDay = new Date(y, m, 1).getDay();
             const lastDate = new Date(y, m + 1, 0).getDate();
             let gridHtml = '';
@@ -251,10 +303,23 @@
         function handleDayClick(key) {
             if (!isSummarizedView) openEditor(key);
             else {
-                document.getElementById('drillDownOptions').innerHTML = config.projects.map(p => {
+                const wrap = document.getElementById('drillDownOptions');
+                wrap.innerHTML = '';
+                config.projects.forEach(p => {
                     const hasData = db.entries[p] && db.entries[p][key] && (db.entries[p][key].html || (db.entries[p][key].actions && db.entries[p][key].actions.length > 0));
-                    return `<button onclick="drillInto('${p}', '${key}')" class="w-full py-5 bg-slate-50 border-4 border-slate-300 rounded-3xl font-black text-indigo-800 uppercase flex items-center justify-center">${p} ${hasData ? '<span class="text-emerald-500 ml-3 text-2xl leading-none">●</span>' : ''}</button>`;
-                }).join('');
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'w-full py-5 bg-slate-50 border-4 border-slate-300 rounded-3xl font-black text-indigo-800 uppercase flex items-center justify-center break-words gap-2';
+                    btn.appendChild(document.createTextNode(p));
+                    if (hasData) {
+                        const dot = document.createElement('span');
+                        dot.className = 'text-emerald-500 text-2xl leading-none';
+                        dot.textContent = '●';
+                        btn.appendChild(dot);
+                    }
+                    btn.addEventListener('click', () => drillInto(p, key));
+                    wrap.appendChild(btn);
+                });
                 document.getElementById('drillDownMenu').classList.remove('hidden');
             }
         }
@@ -275,54 +340,155 @@
             if(!entry.actions?.length) addActionRow();
             const [y, m, d] = key.split('-');
             document.getElementById('editDate').innerText = `${months[m-1]} ${d}, ${y}`;
-            document.getElementById('tagBar').innerHTML = config.tags.map(t => `<button onmousedown="event.preventDefault(); insertHeading('${t.name}', '${t.color}')" style="border: 2px solid ${t.color}; color: ${t.color}" class="px-3 py-1 rounded-full font-black text-[9px] uppercase hover:bg-slate-50 transition-all">${t.name}</button>`).join('');
+            const tagBar = document.getElementById('tagBar');
+            tagBar.innerHTML = '';
+            config.tags.forEach(t => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'px-3 py-1 rounded-full font-black text-[9px] uppercase hover:bg-slate-50 transition-all';
+                b.style.border = `2px solid ${t.color}`;
+                b.style.color = t.color;
+                b.textContent = t.name;
+                b.addEventListener('mousedown', (e) => { e.preventDefault(); insertHeading(t.name, t.color); });
+                tagBar.appendChild(b);
+            });
             document.getElementById('editorModal').classList.remove('hidden');
             setTimeout(() => { document.getElementById('editorModal').classList.remove('translate-y-full'); const mainSurface = document.getElementById('strategySurface'); mainSurface.focus(); lastFocusEl = mainSurface; }, 10);
             isDirty = false;
         }
 
         function saveNoteLogic() {
-            const client = document.getElementById('activeProject').value; if(!client) return;
-            const actions = Array.from(document.querySelectorAll('.action-row')).map(row => ({ text: row.querySelector('input').value, done: row.querySelector('.status-box').classList.contains('bg-indigo-600') }));
-            if(!db.entries[client]) db.entries[client] = {};
-            db.entries[client][activeKey] = { html: document.getElementById('strategySurface').innerHTML, links: document.getElementById('assetLinks').innerHTML, actions: actions };
-            db.strategy[client] = document.getElementById('strategyBullets').innerHTML;
-            localStorage.setItem('hub_db', JSON.stringify(db));
-            isDirty = false;
+            const client = document.getElementById('activeProject').value;
+            if (!client) {
+                alert('No client silo selected; could not save.');
+                return false;
+            }
+            if (!activeKey) return false;
+            try {
+                const actions = Array.from(document.querySelectorAll('.action-row')).map(row => ({
+                    text: row.querySelector('input').value,
+                    done: row.querySelector('.status-box').classList.contains('bg-indigo-600')
+                }));
+                if(!db.entries[client]) db.entries[client] = {};
+                db.entries[client][activeKey] = {
+                    html: document.getElementById('strategySurface').innerHTML,
+                    links: document.getElementById('assetLinks').innerHTML,
+                    actions: actions
+                };
+                db.strategy[client] = document.getElementById('strategyBullets').innerHTML;
+                localStorage.setItem('hub_db', JSON.stringify(db));
+                isDirty = false;
+                return true;
+            } catch (e) {
+                alert('Save failed: ' + (e && e.message ? e.message : String(e)));
+                return false;
+            }
         }
 
         function saveNoteFeedback() {
-            saveNoteLogic(); const btn = document.getElementById('saveBtn'); btn.innerText = "✓ SAVED"; btn.classList.replace('bg-indigo-700', 'bg-emerald-600');
+            if (!saveNoteLogic()) return;
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "✓ SAVED";
+            btn.classList.replace('bg-indigo-700', 'bg-emerald-600');
             setTimeout(() => { btn.innerText = "SAVE NOTE"; btn.classList.replace('bg-emerald-600', 'bg-indigo-700'); }, 1500);
         }
 
         function markDirty() { isDirty = true; }
-        function addActionRow(text = "", done = false) { const div = document.createElement('div'); div.className = 'action-row flex items-center gap-4 mb-2'; div.innerHTML = `<div class="status-box w-7 h-7 border-4 border-slate-300 rounded-lg cursor-pointer ${done ? 'bg-indigo-600 border-indigo-600' : ''}" onclick="this.classList.toggle('bg-indigo-600'); markDirty()"></div><input type="text" class="flex-1 bg-transparent outline-none font-black text-lg ${done ? 'line-through opacity-40' : ''}" value="${text}" oninput="markDirty()" onkeydown="if(event.key==='Enter'){event.preventDefault(); addActionRow();}" placeholder="Tactical action..."><button onclick="this.parentElement.remove(); markDirty()" class="text-slate-400 px-2 font-black text-xs hover:text-red-500">✕</button>`; document.getElementById('actionContainer').appendChild(div); }
+
+        function addActionRow(text = "", done = false) {
+            const div = document.createElement('div');
+            div.className = 'action-row flex items-center gap-4 mb-2';
+            const status = document.createElement('div');
+            status.className = 'status-box w-7 h-7 border-4 border-slate-300 rounded-lg cursor-pointer' + (done ? ' bg-indigo-600 border-indigo-600' : '');
+            status.setAttribute('role', 'button');
+            status.tabIndex = 0;
+            status.addEventListener('click', () => { status.classList.toggle('bg-indigo-600'); status.classList.toggle('border-indigo-600'); markDirty(); });
+            status.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); status.click(); } });
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = text;
+            input.placeholder = 'Tactical action...';
+            input.className = 'flex-1 bg-transparent outline-none font-black text-lg' + (done ? ' line-through opacity-40' : '');
+            input.addEventListener('input', markDirty);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); addActionRow(); }
+            });
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'text-slate-400 px-2 font-black text-xs hover:text-red-500';
+            del.textContent = '✕';
+            del.addEventListener('click', () => { div.remove(); markDirty(); });
+            div.appendChild(status);
+            div.appendChild(input);
+            div.appendChild(del);
+            document.getElementById('actionContainer').appendChild(div);
+        }
+
         function toggleVault() { const v = document.getElementById('vaultMenu'); if(v.classList.contains('hidden')) { document.getElementById('tagBuilder').innerHTML = ''; config.tags.forEach(t => addTagRow(t.name, t.color)); document.getElementById('projectBuilder').innerHTML = ''; config.projects.forEach(p => addProjectRow(p)); } v.classList.toggle('hidden'); }
-        function addTagRow(n="", c="#6366f1") { const html = `<div class="tag-row flex gap-2"><input type="text" value="${n}" class="t-name-input flex-1 p-2 bg-white border-2 border-slate-400 rounded-xl font-bold text-xs uppercase"><input type="color" value="${c}" class="t-color-input w-10 h-10 border-none bg-transparent cursor-pointer"></div>`; document.getElementById('tagBuilder').insertAdjacentHTML('beforeend', html); }
-        function addProjectRow(v="") { const html = `<div class="project-row flex gap-2"><input type="text" value="${v}" class="p-name-input flex-1 p-3 bg-white border-2 border-slate-400 rounded-xl font-bold text-xs uppercase"></div>`; document.getElementById('projectBuilder').insertAdjacentHTML('beforeend', html); }
+        function addTagRow(n="", c="#6366f1") { const html = `<div class="tag-row flex gap-2"><input type="text" value="${escapeHtmlAttr(n)}" class="t-name-input flex-1 p-2 bg-white border-2 border-slate-400 rounded-xl font-bold text-xs uppercase"><input type="color" value="${escapeHtmlAttr(c)}" class="t-color-input w-10 h-10 border-none bg-transparent cursor-pointer"></div>`; document.getElementById('tagBuilder').insertAdjacentHTML('beforeend', html); }
+        function addProjectRow(v="") { const html = `<div class="project-row flex gap-2"><input type="text" value="${escapeHtmlAttr(v)}" class="p-name-input flex-1 p-3 bg-white border-2 border-slate-400 rounded-xl font-bold text-xs uppercase"></div>`; document.getElementById('projectBuilder').insertAdjacentHTML('beforeend', html); }
         function applyVault() { config.tags = Array.from(document.querySelectorAll('.tag-row')).map(r => ({ name: r.querySelector('.t-name-input').value.trim().toUpperCase(), color: r.querySelector('.t-color-input').value })).filter(t => t.name); config.projects = Array.from(document.querySelectorAll('.project-row')).map(r => r.querySelector('.p-name-input').value.trim().toUpperCase()).filter(v => v); if(config.projects.length === 0) config.projects = ["CLIENT 1"]; localStorage.setItem('hub_config', JSON.stringify(config)); toggleVault(); syncNav(); renderCalendar(); }
         
-        function downloadBackup() { const blob = new Blob([JSON.stringify(db)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'stratsilo_backup.json'; a.click(); }
+        function downloadBackup() {
+            try {
+                const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'stratsilo_backup.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            } catch (e) {
+                alert('Backup failed: ' + (e && e.message ? e.message : String(e)));
+            }
+        }
+
         function exportAllToCSV() {
             let csv = "Client,Date,Notes\n";
             config.projects.forEach(client => {
                 const notes = db.entries[client] || {};
                 Object.keys(notes).forEach(date => {
                     const entry = notes[date];
-                    const plain = (entry.html || "").replace(/<[^>]*>/g, '').replace(/"/g, '""');
-                    csv += `"${client}","${date}","${plain}"\n`;
+                    const plain = htmlToPlainText(entry.html || '');
+                    csv += [csvEscapeField(client), csvEscapeField(date), csvEscapeField(plain)].join(',') + '\n';
                 });
             });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `StratSilo_Master_Export.csv`; link.click();
+            try {
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = 'StratSilo_Master_Export.csv';
+                link.click();
+                URL.revokeObjectURL(link.href);
+            } catch (e) {
+                alert('Export failed: ' + (e && e.message ? e.message : String(e)));
+            }
         }
 
-        function syncNav() { const sel = document.getElementById('activeProject'); const cur = sel.value; sel.innerHTML = config.projects.map(p => `<option value="${p}">${p}</option>`).join(''); if(config.projects.includes(cur)) sel.value = cur; else sel.value = config.projects[0]; }
+        function syncNav() {
+            const sel = document.getElementById('activeProject');
+            const cur = sel.value;
+            sel.innerHTML = config.projects.map(p => `<option value="${escapeHtmlAttr(p)}">${escapeHtmlAttr(p)}</option>`).join('');
+            if(config.projects.includes(cur)) sel.value = cur; else sel.value = config.projects[0];
+        }
+
         function syncUI() { isSummarizedView = false; document.getElementById('masterBtn').classList.remove('summarized-active'); renderCalendar(); }
         function toggleMaster() { isSummarizedView = !isSummarizedView; document.getElementById('masterBtn').classList.toggle('summarized-active', isSummarizedView); renderCalendar(); }
-        function handleDone() { saveNoteLogic(); const modal = document.getElementById('editorModal'); modal.classList.add('translate-y-full'); setTimeout(() => { modal.classList.add('hidden'); activeKey = null; renderCalendar(); }, 300); }
-        function navDay(dir) { saveNoteLogic(); const [y, m, d] = activeKey.split('-').map(Number); const n = new Date(y, m-1, d+dir); openEditor(`${n.getFullYear()}-${n.getMonth()+1}-${n.getDate()}`); }
+
+        function handleDone() {
+            if (isDirty && !window.confirm('Save changes before closing this note?')) return;
+            if (!saveNoteLogic()) return;
+            const modal = document.getElementById('editorModal');
+            modal.classList.add('translate-y-full');
+            setTimeout(() => { modal.classList.add('hidden'); activeKey = null; renderCalendar(); }, 300);
+        }
+
+        function navDay(dir) {
+            if (isDirty && !window.confirm('Save changes before switching days?')) return;
+            if (!saveNoteLogic()) return;
+            const [y, m, d] = activeKey.split('-').map(Number);
+            const n = new Date(y, m - 1, d + dir);
+            openEditor(`${n.getFullYear()}-${n.getMonth() + 1}-${n.getDate()}`);
+        }
 
         window.onload = boot;
     </script>
